@@ -1,3 +1,50 @@
 import { Routes } from '@angular/router';
+import { PublicLayoutComponent } from './layout/public-layout/public-layout.component';
+import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
+import { PortfolioComponent } from './home/portfolio/portfolio.component';
+import { LoginComponent } from './admin/auth/login/login.component';
+import { DashboardComponent } from './admin/dashboard/dashboard.component';
+import { ProjetsComponent } from './admin/projets/projets.component';
+import { CompetencesComponent } from './admin/competences/competences.component';
+import { AproposComponent } from './admin/apropos/apropos.component';
+import { ExperiencesComponent } from './admin/experiences/experiences.component';
+import { MessagesComponent } from './admin/messages/messages.component';
+import { BlogComponent } from './admin/blog/blog.component';
+import { TemoignagesComponent } from './admin/temoignages/temoignages.component';
+import { ParametresComponent } from './admin/parametres/parametres.component';
+import { AuthGuard } from './guards/auth.guard';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  // Home Routes
+  {
+    path: '',
+    component: PublicLayoutComponent,
+    children: [
+      { path: '', component: PortfolioComponent },
+      { path: 'home', component: PortfolioComponent },
+      { path: 'admin/login', component: LoginComponent },
+    ],
+  },
+
+  // Admin Routes
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'projets', component: ProjetsComponent },
+      { path: 'competences', component: CompetencesComponent },
+      { path: 'apropos', component: AproposComponent },
+      { path: 'experiences', component: ExperiencesComponent },
+      { path: 'messages', component: MessagesComponent },
+      { path: 'blog', component: BlogComponent },
+      { path: 'temoignages', component: TemoignagesComponent },
+      { path: 'parametres', component: ParametresComponent },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    ],
+  },
+
+  // Fallback
+  { path: '**', redirectTo: '' },
+];

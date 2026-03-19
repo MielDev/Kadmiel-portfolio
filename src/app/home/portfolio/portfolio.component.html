@@ -1,0 +1,528 @@
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- FLOATING CTA -->
+<!-- <div class="floating-cta">
+  <a href="#contact" class="fcta-btn fcta-work">🔥 Travaillons ensemble</a>
+  <a href="#" class="fcta-btn fcta-cv" download>📄 Télécharger mon CV</a>
+</div> -->
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">KT.</div>
+  <ul class="nav-links">
+    <li><a href="#hero">Accueil</a></li>
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#skills">Compétences</a></li>
+    <li><a href="#projects">Projets</a></li>
+    <li><a href="#testimonials">Avis</a></li>
+    <li><a href="#experience">Expérience</a></li>
+    <li><a href="#blog">Blog</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button class="nav-burger" id="burger" aria-label="Menu" aria-expanded="false">
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU OVERLAY -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Navigation mobile">
+  <div class="mobile-menu-inner">
+    <a href="#hero"           class="mobile-link">Accueil</a>
+    <a href="#about"          class="mobile-link">À propos</a>
+    <a href="#skills"         class="mobile-link">Compétences</a>
+    <a href="#projects"       class="mobile-link">Projets</a>
+    <a href="#testimonials"   class="mobile-link">Avis</a>
+    <a href="#experience"     class="mobile-link">Expérience</a>
+    <a href="#blog"           class="mobile-link">Blog</a>
+    <a href="#contact"        class="mobile-link">Contact</a>
+    <div class="mobile-menu-divider"></div>
+    <div class="mobile-menu-contact">
+      <span><a [href]="'mailto:' + aboutData?.email">{{ aboutData?.email }}</a></span>
+      <a [href]="'tel:' + aboutData?.phone">{{ aboutData?.phone }}</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ HERO ══════════ -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-orb-1"></div>
+  <div class="hero-orb-2"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow"> {{ heroData?.greeting }}</div>
+    <h1 class="hero-name">{{ heroData?.name }}</h1>
+    <div class="hero-role">{{ heroData?.role }}</div>
+    <p class="hero-desc">{{ heroData?.description }}</p>
+    
+    <div class="hero-buttons">
+      <a href="#projects" class="btn btn-primary">
+        <span class="btn-dot"></span>
+        VOIR MES PROJETS
+      </a>
+      <a href="#contact" class="btn btn-outline">
+        <span class="btn-icon">📩</span>
+        ME CONTACTER
+      </a>
+      <a [href]="heroData?.cv || '#'" class="btn btn-outline" download>
+        <span class="btn-icon">📄</span>
+        TÉLÉCHARGER CV
+      </a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">{{ heroData?.projects_count }}</div>
+        <div class="stat-label">PROJETS RÉALISÉS</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">{{ heroData?.experience_years }}</div>    
+        <div class="stat-label">ANS D'EXPÉRIENCE</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">{{ heroData?.passion_icon }}</div>
+        <div class="stat-label">PASSION DU CODE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ABOUT ══════════ -->
+<section id="about">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">// À propos</div>
+      <h2 class="section-title">Qui suis-<span>je</span> ?</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="about-grid reveal">
+      <div class="about-photo-wrap">
+        <div class="about-photo-ring">
+          <div class="about-photo-inner">
+            @if (aboutData?.photo) {
+              <img [src]="aboutData?.photo" [alt]="aboutData?.name" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+            } @else {
+              {{ aboutData?.name?.substring(0, 2)?.toUpperCase() }}
+            }
+          </div>
+        </div>
+        <div class="about-info-grid">
+          <div class="about-info-item">
+            <div class="about-info-label">Nom</div>
+            <div class="about-info-value">{{ aboutData?.name }}</div>
+          </div>
+          <div class="about-info-item">
+            <div class="about-info-label">Titre</div>
+            <div class="about-info-value">{{ aboutData?.title }}</div>
+          </div>
+          <div class="about-info-item">
+            <div class="about-info-label">Localisation</div>
+            <div class="about-info-value">{{ aboutData?.location }}</div>
+          </div>
+          <div class="about-info-item">
+            <div class="about-info-label">Nationalité</div>
+            <div class="about-info-value">{{ aboutData?.nationality }}</div>
+          </div>
+          <div class="about-info-item" style="grid-column: 1/-1;">
+            <div class="about-info-label">Email</div>
+            <div class="about-info-value"><a [href]="'mailto:' + aboutData?.email">{{ aboutData?.email }}</a></div>
+          </div>
+          <div class="about-info-item" style="grid-column: 1/-1;">
+            <div class="about-info-label">Téléphone</div>
+            <div class="about-info-value">{{ aboutData?.phone }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-text">
+        <div [innerHTML]="aboutData?.bio"></div>
+        <div class="about-interests">
+          @for (interest of aboutData?.interests; track $index) {
+            <span class="interest-tag">{{ interest }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SKILLS ══════════ -->
+<section id="skills">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">// Compétences</div>
+      <h2 class="section-title">Mon <span>arsenal</span> tech</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="skills-grid reveal">
+      @for (skill of skills; track skill.id) {
+        <div class="skill-card">
+          <div class="skill-header">
+            <div class="skill-icon-box">
+              <i [class]="skill.icon"></i>
+            </div>
+            <div class="skill-name">{{ skill.title }}</div>
+          </div>
+          <div class="skill-desc">{{ skill.description }}</div>
+          <div class="skill-tags">
+            @for (tech of skill.technologies; track $index) {
+              <span class="skill-tag">{{ tech }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PROJECTS ══════════ -->
+<section id="projects">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">// Réalisations</div>
+      <h2 class="section-title">Mes <span>projets</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="projects-grid reveal">
+      @for (project of projects; track project.id) {
+        <div class="project-card">
+          <div class="project-thumb">
+            <div class="project-thumb-bg" [style.backgroundImage]="'url(' + project.image + ')'"></div>
+            <div class="project-year">{{ project.created_at | date:'yyyy' }}</div>
+          </div>
+          <div class="project-body">
+            <div class="project-tags">
+              @for (tag of project.tags; track $index) {
+                <span class="project-tag-badge">{{ tag }}</span>
+              }
+            </div>
+            <div class="project-name">{{ project.title }}</div>
+            <div class="project-desc">{{ project.description }}</div>
+            
+            <div class="project-links">
+              @if (project.demo_url) {
+                <a [href]="project.demo_url" target="_blank" class="project-link demo">
+                  <i class="ri-external-link-line"></i> Demo
+                </a>
+              }
+              @if (project.github_url) {
+                <a [href]="project.github_url" target="_blank" class="project-link github">
+                  <i class="ri-github-line"></i> GitHub
+                </a>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ EXPERIENCE ══════════ -->
+<section id="experience">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">// Expérience</div>
+      <h2 class="section-title">Mon <span>parcours</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="timeline reveal">
+      @for (exp of experiences; track exp.id; let first = $first) {
+        <div class="tl-item">
+          <div class="tl-dot" [class.active]="exp.current === 1 || first"></div>
+          <div class="tl-card">
+            <div class="tl-header">
+              <div class="tl-company">{{ exp.company }}</div>
+              <div class="tl-date">
+                {{ exp.start_date | date:'MM/yyyy' }} – {{ exp.current === 1 ? 'Présent' : (exp.end_date | date:'MM/yyyy') }}
+              </div>
+            </div>
+            <div class="tl-role">{{ exp.title }}</div>
+            <div class="tl-location">
+              <i class="ri-map-pin-line"></i> {{ exp.location }}
+            </div>
+            <ul class="tl-tasks">
+              @for (task of exp.description; track $index) {
+                <li>{{ task }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CE QUE JE RECHERCHE ══════════ -->
+<section id="recherche">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">// Disponibilité</div>
+      <h2 class="section-title">Ce que je <span>recherche</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="reveal">
+      @if (availabilityData) {
+        <div class="recherche-card">
+          <div class="recherche-badge">{{ availabilityData.badge_text }}</div>
+          <h3 class="recherche-title" [innerHTML]="availabilityData.headline"></h3>
+          <p class="recherche-desc">{{ availabilityData.description }}</p>
+          <div class="recherche-tags">
+            @for (tag of availabilityData.tags; track $index) {
+              <div class="recherche-tag">
+                <span class="recherche-tag-icon">
+                  @if (tag.icon && (tag.icon.includes('fa-') || tag.icon.startsWith('bx') || tag.icon.startsWith('ri-') || tag.icon.startsWith('bi'))) {
+                    <i [class]="tag.icon"></i>
+                  } @else if (tag.icon) {
+                    {{ tag.icon }}
+                  } @else if (tag.emoji) {
+                    {{ tag.emoji }}
+                  }
+                </span>
+                {{ tag.text }}
+              </div>
+            }
+          </div>
+          <div class="recherche-cta">
+            <a [href]="getPrimaryCtaHref()" class="btn btn-primary">{{ availabilityData.primary_cta_text }}</a>
+            <a
+              [href]="availabilityData.secondary_cta_url"
+              class="btn btn-outline"
+              [attr.download]="shouldDownload(availabilityData.secondary_cta_url) ? '' : null"
+            >{{ availabilityData.secondary_cta_text }}</a>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CV INTERACTIF / SKILL BARS ══════════ -->
+<section id="cv">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">// CV Interactif</div>
+      <h2 class="section-title">Mes <span>niveaux</span> techniques</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="cv-grid reveal">
+      <div>
+        <div class="cv-col-title">⚡ Hard Skills</div>
+        @for (level of technicalLevels; track level.id; let idx = $index) {
+          @if (level.type === 'hard' && level.percent !== null && level.percent >= 50) {
+            <div class="skill-bar-item">
+              <div class="skill-bar-header"><span class="skill-bar-name">{{ level.title }}</span><span class="skill-bar-pct">{{ level.percent }}%</span></div>
+              <div class="skill-bar-track">
+                <div class="skill-bar-fill" [style.--target-width]="level.percent + '%'" [style.--i]="idx"></div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+      <div>
+        <div class="cv-col-title">🧠 Soft Skills</div>
+        @for (level of technicalLevels; track level.id) {
+          @if (level.type === 'soft' && level.description) {
+            <div class="soft-skill-item">
+              <div class="soft-skill-icon">
+                @if (level.icon && (level.icon.includes('fa-') || level.icon.startsWith('bx') || level.icon.startsWith('ri-') || level.icon.startsWith('bi'))) {
+                  <i [class]="level.icon"></i>
+                } @else {
+                  {{ level.icon }}
+                }
+              </div>
+              <div>
+                <div class="soft-skill-name">{{ level.title }}</div>
+                <div class="soft-skill-desc">{{ level.description }}</div>
+              </div>
+            </div>
+          }
+        }
+        <div class="certif-grid">
+          @for (level of technicalLevels; track level.id) {
+            @if (level.type === 'soft' && !level.description) {
+              <div class="certif-badge">
+                <span class="certif-icon">
+                  @if (level.icon && (level.icon.includes('fa-') || level.icon.startsWith('bx') || level.icon.startsWith('ri-') || level.icon.startsWith('bi'))) {
+                    <i [class]="level.icon"></i>
+                  } @else {
+                    {{ level.icon }}
+                  }
+                </span>
+                {{ level.title }}
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TÉMOIGNAGES ══════════ -->
+<section id="testimonials">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">// Preuves sociales</div>
+      <h2 class="section-title">Ce qu'ils <span>disent</span></h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="testimonials-grid reveal">
+      @for (t of testimonials; track t.id) {
+        @if (t.status === 'published') {
+          <div class="testimonial-card">
+            <div class="testimonial-quote">"</div>
+            <p class="testimonial-text">{{ t.content }}</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">
+                @if (t.photo) {
+                  <img [src]="t.photo" [alt]="t.name">
+                } @else {
+                  {{ t.name.substring(0, 2).toUpperCase() }}
+                }
+              </div>
+              <div>
+                <div class="testimonial-name">{{ t.name }}</div>
+                <div class="testimonial-role">{{ t.role }}{{ t.company ? ' — ' + t.company : '' }}</div>
+                <div class="testimonial-stars">★★★★★</div>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ BLOG TECHNIQUE ══════════ -->
+<section id="blog">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">// Blog technique</div>
+      <h2 class="section-title">Mes <span>articles</span></h2>
+      <div class="section-line"></div>
+      <p style="color:#6B7280;margin-bottom:2.5rem;font-size:0.92rem;max-width:560px;">Je partage mes expériences, astuces et réflexions sur le développement web & mobile. Des articles concrets issus de vrais projets.</p>
+    </div>
+    <div class="blog-grid reveal">
+      @for (post of blogs; track post.id) {
+        @if (post.status === 'published') {
+          <div class="blog-card">
+            <div class="blog-thumb" [style.backgroundImage]="post.image ? ('url(' + post.image + ')') : 'none'" style="background-size: cover; background-position: center;">
+              @if (!post.image) {
+                <div class="blog-thumb-icon">✍️</div>
+              }
+            </div>
+            <div class="blog-body">
+              <span class="blog-tag">{{ post.tags.join(' · ') }}</span>
+              <div class="blog-title">{{ post.title }}</div>
+              <p class="blog-excerpt">{{ post.content | slice:0:120 }}...</p>
+              <div class="blog-meta">
+                <div class="blog-meta-left">
+                  <span class="blog-date">{{ post.created_at | date:'MMMM yyyy' }}</span>
+                  <span class="blog-readtime">{{ post.read_minutes }} min</span>
+                </div>
+                <a [routerLink]="['/blog', post.slug]" class="blog-read">Lire →</a>
+              </div>
+            </div>
+          </div>
+        }
+      }
+      <div class="blog-coming">
+        <span>✍️</span>
+        D'autres articles arrivent bientôt...<br>
+        <span style="font-size:0.75rem;display:block;margin-top:0.5rem;color:#7C3AED;">Architecture microservices · Tests unitaires · React vs Angular</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CONTACT ══════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">// Contact</div>
+      <h2 class="section-title">Un <span>projet</span> en tête ?</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="contact-grid reveal">
+      <div class="contact-info">
+        <p>N'hésitez pas à me contacter pour discuter de votre projet ou pour toute autre question. Je transforme vos idées en solutions digitales performantes et innovantes.</p>
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div>
+            <div class="contact-item-label">Adresse</div>
+            <div class="contact-item-val">{{ aboutData?.location }}</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📞</div>
+          <div>
+            <div class="contact-item-label">Téléphone</div>
+            <div class="contact-item-val">{{ aboutData?.phone }}</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">✉️</div>
+          <div>
+            <div class="contact-item-label">Email</div>
+            <div class="contact-item-val"><a [href]="'mailto:' + aboutData?.email">{{ aboutData?.email }}</a></div>
+          </div>
+        </div>
+      </div>
+      <form class="contact-form" (ngSubmit)="onSubmitContact()" #contactForm="ngForm">
+        @if (submitSuccess) {
+          <div style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid rgba(16, 185, 129, 0.2); font-size: 0.9rem;">
+            ✅ Message envoyé avec succès ! Je vous répondrai dès que possible.
+          </div>
+        }
+        @if (submitError) {
+          <div style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid rgba(239, 68, 68, 0.2); font-size: 0.9rem;">
+            ❌ Erreur lors de l'envoi du message. Veuillez réessayer plus tard.
+          </div>
+        }
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Votre nom</label>
+            <input type="text" class="form-input" name="name" [(ngModel)]="contact.name" required placeholder="Jean Dupont">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Votre email</label>
+            <input type="email" class="form-input" name="email" [(ngModel)]="contact.email" required placeholder="jean@email.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sujet</label>
+          <input type="text" class="form-input" name="subject" [(ngModel)]="contact.subject" required placeholder="Mon projet web...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Votre message</label>
+          <textarea class="form-textarea" name="message" [(ngModel)]="contact.message" required placeholder="Décrivez votre projet ou votre demande..."></textarea>
+        </div>
+        <button type="submit" class="btn-submit" [disabled]="isSubmitting || !contactForm.form.valid">
+          <span>{{ isSubmitting ? '⌛ Envoi en cours...' : '🚀 Envoyer le message' }}</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.2rem;">
+      <div style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;background:linear-gradient(90deg,#FF3B3B,#7C3AED);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">KT.</div>
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+        <a href="#hero" style="color:#6B7280;text-decoration:none;font-family:'Syne',sans-serif;font-size:0.75rem;transition:color 0.2s;" onmouseover="this.style.color='#E5E7EB'" onmouseout="this.style.color='#6B7280'">Accueil</a>
+        <a href="#projects" style="color:#6B7280;text-decoration:none;font-family:'Syne',sans-serif;font-size:0.75rem;transition:color 0.2s;" onmouseover="this.style.color='#E5E7EB'" onmouseout="this.style.color='#6B7280'">Projets</a>
+        <a href="#blog" style="color:#6B7280;text-decoration:none;font-family:'Syne',sans-serif;font-size:0.75rem;transition:color 0.2s;" onmouseover="this.style.color='#E5E7EB'" onmouseout="this.style.color='#6B7280'">Blog</a>
+        <a href="#contact" style="color:#6B7280;text-decoration:none;font-family:'Syne',sans-serif;font-size:0.75rem;transition:color 0.2s;" onmouseover="this.style.color='#E5E7EB'" onmouseout="this.style.color='#6B7280'">Contact</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:1.2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.8rem;">
+      <p style="font-size:0.78rem;color:#6B7280;">© 2026 <strong>Kadmiel TOGNON</strong> — Tous droits réservés.</p>
+      <p style="font-size:0.72rem;color:#6B7280;font-family:'Syne',sans-serif;">Développé avec ❤️ &amp; ☕ · <span style="color:#7C3AED;">Le Mans, France</span></p>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,25 @@
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-title">Admin</div>
+    <div class="login-subtitle">Connexion au back office</div>
+
+    @if (error) {
+      <div class="login-error">{{ error }}</div>
+    }
+
+    <form (ngSubmit)="onSubmit()" #f="ngForm" class="login-form">
+      <div class="login-field">
+        <label class="login-label">Nom d'utilisateur</label>
+        <input class="login-input" name="username" [(ngModel)]="username" required>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Mot de passe</label>
+        <input class="login-input" type="password" name="password" [(ngModel)]="password" required>
+      </div>
+
+      <button class="login-btn" type="submit" [disabled]="isSubmitting || !f.form.valid">
+        {{ isSubmitting ? 'Connexion...' : 'Se connecter' }}
+      </button>
+    </form>
+  </div>
+</div>

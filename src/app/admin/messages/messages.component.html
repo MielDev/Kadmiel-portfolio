@@ -1,0 +1,44 @@
+<div class="messages-page">
+  <div class="messages-header">
+    <div>
+      <div class="messages-title">Messages</div>
+      <div class="messages-subtitle">Formulaire de contact</div>
+    </div>
+    <button class="messages-btn" type="button" (click)="refresh()">Rafraîchir</button>
+  </div>
+
+  @if (error) {
+    <div class="messages-error">{{ error }}</div>
+  }
+
+  @if (isLoading) {
+    <div class="messages-loading">Chargement...</div>
+  } @else {
+    <div class="messages-list">
+      @for (m of messages; track m.id) {
+        <div class="message-card">
+          <div class="message-top">
+            <div class="message-from">
+              <div class="message-name">{{ m.name }}</div>
+              <div class="message-email">{{ m.email }}</div>
+            </div>
+            <div class="message-meta">
+              <div class="message-status">{{ m.status || 'new' }}</div>
+              <div class="message-date">{{ m.created_at ? (m.created_at | date:'dd/MM/yyyy HH:mm') : '' }}</div>
+            </div>
+          </div>
+          <div class="message-subject">{{ m.subject }}</div>
+          <div class="message-content">{{ m.content }}</div>
+          <div class="message-actions">
+            <button class="messages-btn secondary" type="button" (click)="markRead(m)">Marquer lu</button>
+            <button class="messages-btn danger" type="button" (click)="delete(m)">Supprimer</button>
+          </div>
+        </div>
+      }
+
+      @if (messages.length === 0) {
+        <div class="messages-empty">Aucun message pour le moment.</div>
+      }
+    </div>
+  }
+</div>

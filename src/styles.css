@@ -1,1 +1,44 @@
-/* You can add global styles to this file, and also import other style files */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: #070B14;
+  color: #E5E7EB;
+  font-family: 'Syne', sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── CURSOR ─── */
+.cursor {
+  width: 12px; height: 12px;
+  background: #FF3B3B;
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9999;
+  transition: transform 0.1s, opacity 0.2s;
+  mix-blend-mode: screen;
+}
+.cursor-trail {
+  width: 32px; height: 32px;
+  border: 1.5px solid #7C3AED;
+  border-radius: 50%;
+  position: fixed; top: 0; left: 0;
+  pointer-events: none; z-index: 9998;
+  transition: transform 0.18s ease, width 0.2s, height 0.2s;
+}
+
+/* ─── NOISE OVERLAY ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.35;
+}
+
+@media (hover: none) {
+  body { cursor: auto; }
+  * { cursor: auto; }
+  .cursor, .cursor-trail { display: none !important; }
+}
