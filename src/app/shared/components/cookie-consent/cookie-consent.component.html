@@ -1,0 +1,41 @@
+<div class="cookie-banner" *ngIf="showBanner">
+  <div class="cookie-content">
+    <div class="cookie-header">
+      <span class="cookie-icon">🍪</span>
+      <h3>Respect de votre vie privée</h3>
+    </div>
+    
+    <p>
+      Nous utilisons des cookies pour améliorer votre expérience.
+    </p>
+
+    <div class="cookie-details-toggle" (click)="isExpanded = !isExpanded">
+      <span>{{ isExpanded ? 'Masquer les détails' : 'Voir les détails de ce que nous suivons' }}</span>
+      <span class="toggle-icon" [class.rotated]="isExpanded">▼</span>
+    </div>
+
+    <div class="cookie-details-content" [class.expanded]="isExpanded">
+      <div class="cookie-table-container">
+        <table class="cookie-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cookie of cookiesList">
+              <td><code>{{ cookie.name }}</code></td>
+              <td>{{ cookie.description }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cookie-actions">
+      <button class="btn-decline" (click)="declineAll()">Tout refuser</button>
+      <button class="btn-accept" (click)="acceptAll()">Tout accepter</button>
+    </div>
+  </div>
+</div>

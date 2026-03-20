@@ -1,19 +1,20 @@
 <div class="admin-layout">
-  <nav class="admin-sidebar">
-    <!-- Sidebar navigation items -->
-    <ul>
-      <li><a routerLink="/admin/dashboard">Dashboard</a></li>
-      <li><a routerLink="/admin/projets">Projets</a></li>
-      <li><a routerLink="/admin/competences">Compétences</a></li>
-      <li><a routerLink="/admin/experiences">Expériences</a></li>
-      <li><a routerLink="/admin/apropos">À propos</a></li>
-      <li><a routerLink="/admin/blog">Blog</a></li>
-      <li><a routerLink="/admin/messages">Messages</a></li>
-      <li><a routerLink="/admin/temoignages">Témoignages</a></li>
-      <li><a routerLink="/admin/parametres">Paramètres</a></li>
-    </ul>
-  </nav>
-  <main class="admin-content">
-    <router-outlet></router-outlet>
-  </main>
+  <app-admin-sidebar [class.open]="isSidebarOpen"></app-admin-sidebar>
+  
+  <div class="main">
+    <app-admin-navbar></app-admin-navbar>
+    
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </div>
+
+<!-- Custom cursor moved inside to inherit variables if needed and be on top -->
+<div class="cur" #cur [style.display]="isMobile ? 'none' : 'block'"></div>
+<div class="cur-ring" #curRing [style.display]="isMobile ? 'none' : 'block'"></div>
+
+<!-- Mobile toggle -->
+<button class="mob-toggle" (click)="toggleSidebar()">
+  <span></span><span></span><span></span>
+</button>

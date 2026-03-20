@@ -1,25 +1,175 @@
-<div class="login-wrap">
-  <div class="login-card">
-    <div class="login-title">Admin</div>
-    <div class="login-subtitle">Connexion au back office</div>
+<!-- Custom cursor -->
+<div class="cur" #cur [style.display]="isMobile ? 'none' : 'block'"></div>
+<div class="cur-ring" #curRing [style.display]="isMobile ? 'none' : 'block'"></div>
 
-    @if (error) {
-      <div class="login-error">{{ error }}</div>
-    }
+<!-- Background -->
+<div class="bg-grid"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="scanline"></div>
 
-    <form (ngSubmit)="onSubmit()" #f="ngForm" class="login-form">
-      <div class="login-field">
-        <label class="login-label">Nom d'utilisateur</label>
-        <input class="login-input" name="username" [(ngModel)]="username" required>
-      </div>
-      <div class="login-field">
-        <label class="login-label">Mot de passe</label>
-        <input class="login-input" type="password" name="password" [(ngModel)]="password" required>
-      </div>
+<!-- Corner decorations -->
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
 
-      <button class="login-btn" type="submit" [disabled]="isSubmitting || !f.form.valid">
-        {{ isSubmitting ? 'Connexion...' : 'Se connecter' }}
-      </button>
-    </form>
+<!-- Particles -->
+<div class="particles">
+  <div
+    *ngFor="let p of particles"
+    class="particle"
+    [style.width.px]="p.size"
+    [style.height.px]="p.size"
+    [style.left]="p.left"
+    [style.animation-duration]="p.duration"
+    [style.animation-delay]="p.delay"
+    [style.background]="p.background"
+  ></div>
+</div>
+
+<!-- Login Card -->
+<div class="wrap">
+
+  <!-- Logo -->
+  <div class="logo-area">
+    <div class="logo-mark" (mouseenter)="onMouseEnterElement()" (mouseleave)="onMouseLeaveElement()">
+      <span>KT</span>
+      <div class="logo-dot"></div>
+    </div>
+    <div class="logo-title">BACK-OFFICE</div>
+    <div class="logo-sub">PORTFOLIO SYSTEM <span class="cursor-blink"></span></div>
   </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <div class="card-header">
+      <div class="card-title">Authentification</div>
+      <div class="card-desc">
+        <div class="status-dot"></div>
+        SYSTÈME SÉCURISÉ · ACCÈS RESTREINT
+      </div>
+    </div>
+
+    <!-- Error alert -->
+    <div class="alert" [class.show]="error">
+      <i class="ri-error-warning-line"></i>
+      <span>{{ error }}</span>
+    </div>
+
+    <form class="form" (submit)="onSubmit()" style="margin-top: 0.5rem;">
+
+      <!-- Identifiant -->
+      <div class="field">
+        <div class="field-label">
+          <span>Identifiant</span>
+          <div class="field-label-line"></div>
+        </div>
+        <div class="input-wrap">
+          <span class="input-icon"><i class="ri-user-6-line"></i></span>
+          <input
+            class="field-input"
+            name="username"
+            [(ngModel)]="username"
+            type="text"
+            placeholder="votre_identifiant"
+            autocomplete="username"
+            spellcheck="false"
+            (mouseenter)="onMouseEnterElement()"
+            (mouseleave)="onMouseLeaveElement()"
+          >
+          <div class="input-border"></div>
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="field">
+        <div class="field-label">
+          <span>Mot de passe</span>
+          <div class="field-label-line"></div>
+        </div>
+        <div class="input-wrap">
+          <span class="input-icon"><i class="ri-lock-password-line"></i></span>
+          <input
+            class="field-input"
+            name="password"
+            [(ngModel)]="password"
+            [type]="pwdVisible ? 'text' : 'password'"
+            placeholder="••••••••••••"
+            autocomplete="current-password"
+            style="padding-right: 2.8rem;"
+            (mouseenter)="onMouseEnterElement()"
+            (mouseleave)="onMouseLeaveElement()"
+          >
+          <div class="input-border"></div>
+          <button
+            type="button"
+            class="eye-toggle"
+            (click)="togglePwd()"
+            (mouseenter)="onMouseEnterElement()"
+            (mouseleave)="onMouseLeaveElement()"
+          >
+            <i [class]="pwdVisible ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Extras -->
+      <div class="extras">
+        <label class="remember" (click)="toggleRemember()" (mouseenter)="onMouseEnterElement()" (mouseleave)="onMouseLeaveElement()">
+          <div class="check-box" [class.checked]="remembered"></div>
+          <span class="remember-label">Se souvenir</span>
+        </label>
+        <a routerLink="/" class="forgot" (mouseenter)="onMouseEnterElement()" (mouseleave)="onMouseLeaveElement()">
+          Mot de passe oublié ?
+        </a>
+      </div>
+
+      <!-- Submit -->
+      <button
+        type="submit"
+        class="btn-login"
+        [class.loading]="isSubmitting"
+        [disabled]="isSubmitting || loginSuccess"
+        [style.background]="loginSuccess ? 'linear-gradient(90deg,#22C55E,#16A34A)' : null"
+        [style.boxShadow]="loginSuccess ? '0 0 40px rgba(34,197,94,0.6)' : null"
+        (mouseenter)="onMouseEnterElement()"
+        (mouseleave)="onMouseLeaveElement()"
+      >
+        <div class="btn-login-text">
+          <div class="spinner"></div>
+          <span class="btn-text" *ngIf="!loginSuccess"><i class="ri-flashlight-line" style="margin-right: 0.5rem;"></i> Accéder au système</span>
+          <span class="btn-text" *ngIf="loginSuccess"><i class="ri-check-double-line" style="margin-right: 0.5rem;"></i> Accès autorisé — Redirection...</span>
+        </div>
+      </button>
+
+    </form>
+
+    <!-- Divider -->
+    <div class="divider" style="margin-top:1.5rem;">
+      <div class="divider-line"></div>
+      <span class="divider-text">Connexion sécurisée</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- Back link -->
+    <a routerLink="/" class="back-link" style="margin-top:1rem;display:flex;" (mouseenter)="onMouseEnterElement()" (mouseleave)="onMouseLeaveElement()">
+      Retour au portfolio
+    </a>
+
+    <!-- Security badge -->
+    <div class="security-badge">
+      <i class="ri-shield-check-line" style="margin-right: 0.5rem;"></i>
+      PROTOCOLE TLS 1.3 · CHIFFREMENT AES-256
+    </div>
+
+  </div>
+
+  <!-- Footer meta -->
+  <div class="meta">
+    KT PORTFOLIO SYSTEM · v2.1.0 · © 2026 KADMIEL TOGNON
+  </div>
+
 </div>

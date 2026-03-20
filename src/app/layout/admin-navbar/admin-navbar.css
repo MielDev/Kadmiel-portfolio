@@ -1,0 +1,79 @@
+:host {
+  --bg:        #070B14;
+  --bg2:       #0C1220;
+  --bg3:       #0F172A;
+  --red:       #FF3B3B;
+  --violet:    #7C3AED;
+  --text:      #E5E7EB;
+  --muted:     #4B5563;
+  --muted2:    #6B7280;
+  --border:    rgba(255,255,255,0.06);
+  --bv:        rgba(124,58,237,0.25);
+  --br:        rgba(255,59,59,0.25);
+  --glow-r:    0 0 24px rgba(255,59,59,0.45);
+  --glow-v:    0 0 24px rgba(124,58,237,0.5);
+  --green:     #22C55E;
+  --yellow:    #FBBF24;
+  --blue:      #38BDF8;
+
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(7,11,20,.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: .9rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topbar-title{
+  font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;
+  letter-spacing:.06em;
+}
+.topbar-breadcrumb{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;
+  color:var(--muted);letter-spacing:.1em;
+}
+.topbar-breadcrumb span{color:var(--violet);}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:.8rem;}
+.topbar-search{
+  display:flex;align-items:center;gap:.5rem;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:.5rem .9rem;
+  transition:border-color .2s;
+}
+.topbar-search:focus-within{border-color:var(--bv);}
+.topbar-search input{
+  background:none;border:none;outline:none;
+  color:var(--text);font-family:'JetBrains Mono',monospace;
+  font-size:.75rem;width:160px;cursor:none;
+}
+.topbar-search input::placeholder{color:var(--muted);}
+.topbar-btn{
+  width:36px;height:36px;border-radius:8px;cursor:none;
+  background:var(--bg2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;transition:all .2s;position:relative;
+}
+.topbar-btn:hover{border-color:var(--bv);box-shadow:var(--glow-v);}
+.notif-dot{
+  position:absolute;top:5px;right:5px;
+  width:7px;height:7px;border-radius:50%;
+  background:var(--red);box-shadow:var(--glow-r);
+  border:1.5px solid var(--bg);
+}
+.topbar-time{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  color:var(--muted);letter-spacing:.08em;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:.5rem .9rem;
+  white-space:nowrap;
+}
+
+@media(max-width:768px){
+  :host {
+    padding: .9rem 1rem;
+  }
+}

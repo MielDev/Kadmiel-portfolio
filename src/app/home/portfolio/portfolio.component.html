@@ -59,15 +59,15 @@
     <p class="hero-desc">{{ heroData?.description }}</p>
     
     <div class="hero-buttons">
-      <a href="#projects" class="btn btn-primary">
+      <a href="#projects" class="btn btn-primary" data-analytics="hero_projects">
         <span class="btn-dot"></span>
         VOIR MES PROJETS
       </a>
-      <a href="#contact" class="btn btn-outline">
+      <a href="#contact" class="btn btn-outline" data-analytics="hero_contact">
         <span class="btn-icon">📩</span>
         ME CONTACTER
       </a>
-      <a [href]="heroData?.cv || '#'" class="btn btn-outline" download>
+      <a [href]="heroData?.cv || '#'" class="btn btn-outline" download data-analytics="hero_cv">
         <span class="btn-icon">📄</span>
         TÉLÉCHARGER CV
       </a>
@@ -203,12 +203,12 @@
             
             <div class="project-links">
               @if (project.demo_url) {
-                <a [href]="project.demo_url" target="_blank" class="project-link demo">
+                <a [href]="project.demo_url" target="_blank" class="project-link demo" data-analytics="project_demo">
                   <i class="ri-external-link-line"></i> Demo
                 </a>
               }
               @if (project.github_url) {
-                <a [href]="project.github_url" target="_blank" class="project-link github">
+                <a [href]="project.github_url" target="_blank" class="project-link github" data-analytics="project_github">
                   <i class="ri-github-line"></i> GitHub
                 </a>
               }
@@ -286,11 +286,12 @@
             }
           </div>
           <div class="recherche-cta">
-            <a [href]="getPrimaryCtaHref()" class="btn btn-primary">{{ availabilityData.primary_cta_text }}</a>
+            <a [href]="getPrimaryCtaHref()" class="btn btn-primary" data-analytics="availability_primary">{{ availabilityData.primary_cta_text }}</a>
             <a
               [href]="availabilityData.secondary_cta_url"
               class="btn btn-outline"
               [attr.download]="shouldDownload(availabilityData.secondary_cta_url) ? '' : null"
+              data-analytics="availability_secondary"
             >{{ availabilityData.secondary_cta_text }}</a>
           </div>
         </div>
@@ -500,7 +501,7 @@
           <label class="form-label">Votre message</label>
           <textarea class="form-textarea" name="message" [(ngModel)]="contact.message" required placeholder="Décrivez votre projet ou votre demande..."></textarea>
         </div>
-        <button type="submit" class="btn-submit" [disabled]="isSubmitting || !contactForm.form.valid">
+        <button type="submit" class="btn-submit" [disabled]="isSubmitting || !contactForm.form.valid" data-analytics="contact_submit_btn">
           <span>{{ isSubmitting ? '⌛ Envoi en cours...' : '🚀 Envoyer le message' }}</span>
         </button>
       </form>

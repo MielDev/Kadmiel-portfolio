@@ -1,5 +1,5 @@
 <div class="public-layout">
-  <header>
+  <header *ngIf="!isLoginPage()">
     <nav>
       <a routerLink="/">Portfolio</a>
       <a routerLink="/admin/login">Connexion Admin</a>
@@ -8,7 +8,7 @@
   <main>
     <router-outlet></router-outlet>
   </main>
-  <footer>
+  <footer *ngIf="!isLoginPage()">
     <p>&copy; 2026 Portfolio</p>
   </footer>
 </div>

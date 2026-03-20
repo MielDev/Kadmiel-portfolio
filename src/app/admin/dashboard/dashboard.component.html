@@ -1,1 +1,266 @@
-<p>dashboard works!</p>
+<div class="content">
+
+  <!-- STAT CARDS -->
+  <div class="stats-row">
+    <div *ngFor="let stat of stats; let i = index" class="stat-card fade-in"
+      [style.--accent-glow]="stat.color + '14'" 
+      [style.--accent-color]="stat.color + '4D'"
+      [style.--accent-glow2]="stat.color + '0D'" 
+      [style.--icon-bg]="stat.color + '1F'"
+      [style.--icon-border]="stat.color + '33'" 
+      [style.--val-color]="stat.color">
+      <div class="stat-card-border"></div>
+      <div class="stat-card-icon"><i [class]="stat.icon"></i></div>
+      <div class="stat-label">{{ stat.label }}</div>
+      <div class="stat-value">{{ displayedStats[i] }}</div>
+      <div class="stat-meta">
+        <span class="stat-trend" [class.trend-up]="stat.trendUp" [class.trend-down]="!stat.trendUp">
+          <i [class]="stat.trendUp ? 'ri-arrow-up-line' : 'ri-arrow-down-line'"></i> {{ stat.trend }}
+        </span>
+        <span class="stat-period">vs mois dernier</span>
+      </div>
+      <div class="sparkline-wrap">
+        <canvas #spark1 *ngIf="i === 0"></canvas>
+        <canvas #spark2 *ngIf="i === 1"></canvas>
+        <canvas #spark3 *ngIf="i === 2"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW -->
+  <div class="grid-2-1">
+    <!-- Visiteurs chart -->
+    <div class="panel fade-in">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div> Trafic des visiteurs</div>
+        <div style="display:flex;gap:.6rem;align-items:center;">
+          <button class="panel-action" (click)="setRange($event.target, '7j')" style="opacity:.5;">7j</button>
+          <button class="panel-action" (click)="setRange($event.target, '30j')" style="color:var(--red);">30j</button>
+          <button class="panel-action" (click)="setRange($event.target, '90j')" style="opacity:.5;">90j</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="chart-area">
+          <canvas #trafficChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donut sources -->
+    <div class="panel fade-in">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div> Sources des trafics</div>
+        <button class="panel-action" routerLink="/admin/analytics">Détails <i class="ri-arrow-right-line"></i></button>
+      </div>
+      <div class="panel-body">
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="130" height="130" viewBox="0 0 130 130">
+            <circle cx="65" cy="65" r="50" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="18"/>
+            <circle *ngFor="let s of trafficSources; let i = index" 
+              [attr.stroke]="['#7C3AED', '#FF3B3B', '#38BDF8', '#FBBF24', '#22C55E'][i % 5]"
+              cx="65" cy="65" r="50" fill="none" stroke-width="18"
+              [attr.stroke-dasharray]="donutDashArrays[i]" stroke-linecap="round"
+              [style.transform]="'rotate(-90 65 65)'"
+              [style.stroke-dashoffset]="donutOffsets[i]"
+              style="transition: stroke-dasharray 1.2s ease, stroke-dashoffset 1.2s ease">
+            </circle>
+            <text x="65" y="61" text-anchor="middle" fill="#E5E7EB"
+              font-family="Orbitron,sans-serif" font-size="13" font-weight="700">{{ totalVisits }}</text>
+            <text x="65" y="75" text-anchor="middle" fill="#4B5563"
+              font-family="JetBrains Mono,monospace" font-size="7">ACTIONS</text>
+          </svg>
+          <div class="donut-legend">
+            <div *ngFor="let s of trafficSources; let i = index" class="legend-item">
+              <div class="legend-dot" [style.background]="['#7C3AED', '#FF3B3B', '#38BDF8', '#FBBF24', '#22C55E'][i % 5]"></div>
+              <span style="text-transform: capitalize;">{{ s.source || 'Direct' }}</span>
+              <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);">{{ s.percentage }}%</span>
+            </div>
+            <div *ngIf="trafficSources.length === 0" style="font-size: 0.7rem; color: var(--muted);">Aucune donnée</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGES + ACTIVITY -->
+  <div class="grid-2-1">
+    <!-- Messages -->
+    <div class="panel fade-in">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div> Derniers messages</div>
+        <button class="panel-action" routerLink="/admin/messages">Voir tout <i class="ri-arrow-right-line"></i></button>
+      </div>
+      <div *ngFor="let msg of messages" class="msg-item">
+        <div class="msg-avatar" [style.background]="msg.color">{{ msg.initial }}</div>
+        <div class="msg-content">
+          <div class="msg-header">
+            <span class="msg-name">{{ msg.name }}</span>
+            <span class="msg-time">{{ msg.time }}</span>
+          </div>
+          <div class="msg-subject">{{ msg.subject }}</div>
+        </div>
+        <div *ngIf="msg.status === 'unread'" class="msg-unread"></div>
+      </div>
+      <div *ngIf="messages.length === 0" style="padding: 2rem; text-align: center; color: var(--muted);">
+        Aucun message reçu.
+      </div>
+      <div *ngIf="messages.length > 0" style="padding:1rem 1.5rem;text-align:center;">
+        <button class="panel-action-btn" routerLink="/admin/messages">
+          <i class="ri-mail-send-line" style="margin-right: 0.5rem;"></i> GÉRER LES MESSAGES
+        </button>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="panel fade-in">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div> Activité récente</div>
+        <button class="panel-action" routerLink="/admin/analytics">Journal <i class="ri-arrow-right-line"></i></button>
+      </div>
+      <div class="panel-body" style="padding-top:1rem;">
+        <div *ngFor="let act of activities" class="activity-item">
+          <div class="act-icon-wrap" [style.background]="act.color" [style.border]="'1px solid ' + act.border">
+            <i [class]="act.icon"></i>
+          </div>
+          <div>
+            <div class="act-text" [innerHTML]="act.text"></div>
+            <div class="act-time">{{ act.time }}</div>
+          </div>
+        </div>
+        <div *ngIf="activities.length === 0" style="padding: 1rem; text-align: center; color: var(--muted);">
+          Aucune activité récente.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJECTS TABLE -->
+  <div class="section-label">Gestion des projets</div>
+  <div class="panel fade-in" style="margin-bottom:1.6rem;">
+    <div class="panel-head">
+      <div class="panel-title"><div class="panel-dot"></div> Projets récents</div>
+      <button class="btn-new-project" routerLink="/admin/projets">
+        + Nouveau projet
+      </button>
+    </div>
+    <table class="proj-table">
+      <thead>
+        <tr>
+          <th>Projet</th>
+          <th>Stack</th>
+          <th>Statut</th>
+          <th>Vues</th>
+          <th>Dernière MàJ</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let proj of projects">
+          <td><div class="proj-name">{{ proj.title }}</div></td>
+          <td><div class="proj-stack">{{ proj.technologies }}</div></td>
+          <td>
+            <span class="proj-status" [ngClass]="'status-' + proj.status">
+              <span class="status-dot-sm"></span>{{ proj.status === 'live' ? 'En ligne' : proj.status }}
+            </span>
+          </td>
+          <td><span style="font-family:'JetBrains Mono',monospace;font-size:.75rem;">{{ proj.views || 0 }}</span></td>
+          <td><span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted);">{{ (proj.updated_at || proj.created_at) | date:'dd MMM yyyy' }}</span></td>
+          <td><div class="proj-actions">
+            <button class="proj-btn primary" [routerLink]="['/admin/projets/edit', proj.id]">Éditer</button>
+            <button class="proj-btn" [routerLink]="['/admin/projets', proj.id]">Voir</button>
+          </div></td>
+        </tr>
+        <tr *ngIf="projects.length === 0">
+          <td colspan="6" style="padding: 2rem; text-align: center; color: var(--muted);">
+            Aucun projet trouvé.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="grid-2">
+    <!-- Visitors map -->
+    <div class="panel fade-in">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div> Visiteurs par pays</div>
+        <button class="panel-action" routerLink="/admin/analytics">Carte complète <i class="ri-arrow-right-line"></i></button>
+      </div>
+      <div class="panel-body">
+        <div class="map-placeholder">
+          <div class="map-grid"></div>
+          <div class="map-dot" style="top:42%;left:49%;"></div>
+          <div class="map-dot" style="top:30%;left:52%;background:var(--violet);box-shadow:var(--glow-v);animation-delay:.5s;"></div>
+          <div class="map-dot" style="top:55%;left:25%;background:var(--blue);box-shadow:0 0 20px rgba(56,189,248,.6);animation-delay:1s;width:6px;height:6px;"></div>
+          <div class="map-dot" style="top:40%;left:72%;background:var(--yellow);box-shadow:0 0 20px rgba(251,191,36,.6);animation-delay:1.5s;width:6px;height:6px;"></div>
+          <span style="position:absolute;font-family:'JetBrains Mono',monospace;font-size:.65rem;
+            color:rgba(255,255,255,.6);top:1rem;left:1rem;letter-spacing:.1em;">MONDE</span>
+          <div class="map-label">
+            <span *ngFor="let c of visitorCountries.slice(0, 4)">● {{ c.country || 'Inconnu' }}  </span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-top:1.2rem;">
+          <div *ngFor="let c of visitorCountries.slice(0, 4); let i = index" 
+            class="country-stat" 
+            [style.background]="['rgba(255,59,59,.06)', 'rgba(124,58,237,.06)', 'rgba(56,189,248,.06)', 'rgba(251,191,36,.06)'][i % 4]"
+            [style.border-color]="['rgba(255,59,59,.15)', 'rgba(124,58,237,.15)', 'rgba(56,189,248,.15)', 'rgba(251,191,36,.15)'][i % 4]">
+            <div class="country-val" [style.color]="['var(--red)', 'var(--violet)', 'var(--blue)', 'var(--yellow)'][i % 4]">
+              {{ getCountryPerc(c.count) }}%
+            </div>
+            <div class="country-name">{{ c.country || 'Inconnu' }}</div>
+          </div>
+          <div *ngIf="visitorCountries.length === 0" style="grid-column: span 4; text-align: center; color: var(--muted); font-size: 0.7rem;">
+            Aucune donnée géographique
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="panel fade-in">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div> Actions rapides</div>
+      </div>
+      <div class="panel-body">
+        <div class="qa-grid">
+          <button class="qa-btn" routerLink="/admin/projets">
+            <div class="qa-icon qa-icon-red"><i class="ri-folder-add-line"></i></div>
+            <div><div class="qa-label">Ajouter projet</div><div class="qa-sub">Publier nouveau</div></div>
+          </button>
+          <button class="qa-btn secondary" routerLink="/admin/messages">
+            <div class="qa-icon qa-icon-vio"><i class="ri-mail-send-line"></i></div>
+            <div><div class="qa-label">Répondre</div><div class="qa-sub">Messages</div></div>
+          </button>
+          <button class="qa-btn secondary" routerLink="/admin/blog">
+            <div class="qa-icon qa-icon-vio"><i class="ri-edit-line"></i></div>
+            <div><div class="qa-label">Écrire article</div><div class="qa-sub">Blog tech</div></div>
+          </button>
+          <button class="qa-btn" routerLink="/admin/apropos">
+            <div class="qa-icon qa-icon-red"><i class="ri-user-settings-line"></i></div>
+            <div><div class="qa-label">Éditer profil</div><div class="qa-sub">À propos</div></div>
+          </button>
+          <button class="qa-btn" routerLink="/admin/temoignages">
+            <div class="qa-icon qa-icon-red"><i class="ri-chat-quote-line"></i></div>
+            <div><div class="qa-label">Témoignage</div><div class="qa-sub">Ajouter avis</div></div>
+          </button>
+          <button class="qa-btn secondary" routerLink="/admin/parametres">
+            <div class="qa-icon qa-icon-vio"><i class="ri-rocket-2-line"></i></div>
+            <div><div class="qa-label">Déployer</div><div class="qa-sub">Mettre en ligne</div></div>
+          </button>
+        </div>
+        <div class="uptime-badge">
+          <i class="ri-checkbox-circle-fill" style="font-size:1.3rem; color: var(--green);"></i>
+          <div>
+            <div class="uptime-label">Portfolio en ligne</div>
+            <div class="uptime-sub">
+              Statut opérationnel · {{ totalVisits }} Actions enregistrées
+            </div>
+          </div>
+          <a routerLink="/" class="btn-view-site">VOIR <i class="ri-arrow-right-line"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

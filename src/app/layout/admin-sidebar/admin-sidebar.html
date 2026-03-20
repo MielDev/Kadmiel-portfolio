@@ -1,0 +1,57 @@
+<div class="sidebar-logo">
+  <div class="sidebar-logo-mark">KT</div>
+  <div class="sidebar-logo-text">
+    <div class="sidebar-logo-title">BACK-OFFICE</div>
+    <div class="sidebar-logo-sub">PORTFOLIO v2.1</div>
+  </div>
+</div>
+
+<nav class="sidebar-nav">
+  <div class="nav-section-label">Principal</div>
+  <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-dashboard-line"></i></span> Dashboard
+  </a>
+  <a routerLink="/admin/projets" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-folder-line"></i></span> Projets
+  </a>
+  <a routerLink="/admin/messages" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-mail-line"></i></span> Messages
+    <span class="nav-badge">4</span>
+  </a>
+  <a routerLink="/admin/blog" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-edit-box-line"></i></span> Blog
+  </a>
+  <a routerLink="/admin/apropos" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-user-line"></i></span> Profil
+  </a>
+
+  <div class="nav-section-label" style="margin-top:.8rem;">Données</div>
+  <a routerLink="/admin/analytics" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-bar-chart-line"></i></span> Analytics
+  </a>
+  <a routerLink="/admin/temoignages" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-chat-quote-line"></i></span> Témoignages
+  </a>
+  <a routerLink="/admin/competences" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-tools-line"></i></span> Compétences
+  </a>
+
+  <div class="nav-section-label" style="margin-top:.8rem;">Système</div>
+  <a routerLink="/admin/parametres" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-settings-line"></i></span> Paramètres
+  </a>
+  <a (click)="logout()" class="nav-item">
+    <span class="nav-icon"><i class="ri-logout-box-r-line"></i></span> Déconnexion
+  </a>
+</nav>
+
+<div class="sidebar-footer">
+  <div class="user-card">
+    <div class="user-avatar">KT</div>
+    <div>
+      <div class="user-name">Kadmiel</div>
+      <div class="user-role">ADMIN · FULL ACCESS</div>
+    </div>
+    <div class="user-dot"></div>
+  </div>
+</div>
