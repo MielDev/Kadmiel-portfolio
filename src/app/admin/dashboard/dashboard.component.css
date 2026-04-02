@@ -57,7 +57,9 @@
   font-family:'Orbitron',sans-serif;font-size:1.9rem;font-weight:700;
   letter-spacing:-.02em;line-height:1;margin-bottom:.5rem;
   background:linear-gradient(135deg,#fff 40%,var(--val-color,var(--violet)));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .stat-meta{display:flex;align-items:center;gap:.4rem;}
 .stat-trend{

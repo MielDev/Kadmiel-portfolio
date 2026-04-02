@@ -58,7 +58,7 @@ export class AdminLayoutComponent implements AfterViewInit {
   onMouseOver(e: MouseEvent): void {
     if (this.isMobile || !this.curRing) return;
     const target = e.target as HTMLElement;
-    const interactiveSelectors = ['a', 'button', '.stat-card', '.nav-item', '.msg-item', '.proj-table tr', '.qa-btn', '.user-card', '.field-input', '.eye-toggle'];
+    const interactiveSelectors = ['a', 'button', '.stat-card', '.nav-item', '.msg-item', '.proj-table tr', '.qa-btn', '.user-card', '.field-input', '.eye-toggle', '.msg-row', '.mini-stat', '.inbox-filter', '.bulk-btn', '.dab-btn', '.msg-checkbox'];
     const isInteractive = interactiveSelectors.some(selector => target.closest(selector));
 
     if (isInteractive) {

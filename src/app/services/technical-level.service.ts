@@ -19,5 +19,28 @@ export class TechnicalLevelService {
       map(response => response.success ? response.data : [])
     );
   }
-}
 
+  getTechnicalLevel(id: number): Observable<TechnicalLevel | null> {
+    return this.http.get<ApiResponse<TechnicalLevel>>(`${this.apiUrl}/${id}`).pipe(
+      map(response => response.success ? response.data : null)
+    );
+  }
+
+  createTechnicalLevel(data: Partial<TechnicalLevel>): Observable<TechnicalLevel | null> {
+    return this.http.post<ApiResponse<TechnicalLevel>>(this.apiUrl, data).pipe(
+      map(response => response.success ? response.data : null)
+    );
+  }
+
+  updateTechnicalLevel(id: number, data: Partial<TechnicalLevel>): Observable<TechnicalLevel | null> {
+    return this.http.put<ApiResponse<TechnicalLevel>>(`${this.apiUrl}/${id}`, data).pipe(
+      map(response => response.success ? response.data : null)
+    );
+  }
+
+  deleteTechnicalLevel(id: number): Observable<boolean> {
+    return this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`).pipe(
+      map(response => response.success)
+    );
+  }
+}

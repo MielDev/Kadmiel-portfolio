@@ -1,1 +1,805 @@
-<p>parametres works!</p>
+<!-- Styles déplacés dans parametres.component.css -->
+
+<div class="cur" #cur></div>
+<div class="cur-ring" #curRing></div>
+
+<!-- Pas de Navbar/Sidebar ici car ils sont gérés par le layout parent Admin -->
+
+<div class="content">
+  <!-- Loading & Error states -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement de la configuration...</p>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-state">
+    <p>{{ errorMessage }}</p>
+    <button class="btn-secondary" (click)="loadSettings()">Réessayer</button>
+  </div>
+
+  <div class="settings-layout" *ngIf="!isLoading && !errorMessage">
+
+    <!-- SETTINGS NAV -->
+    <div class="settings-nav">
+      <div class="settings-nav-item" [class.active]="activeSection === 'apparence'" (click)="showSection('apparence')">
+        <span class="snav-icon">🎨</span><span class="snav-label">Apparence</span>
+      </div>
+      <div class="settings-nav-item" [class.active]="activeSection === 'hero'" (click)="showSection('hero')">
+        <span class="snav-icon">🚀</span><span class="snav-label">Section Hero</span>
+        <span class="snav-badge">MAJ</span>
+      </div>
+      <div class="settings-nav-item" [class.active]="activeSection === 'branding'" (click)="showSection('branding')">
+        <span class="snav-icon">◈</span><span class="snav-label">Logo & Marque</span>
+      </div>
+      <div class="settings-nav-item" [class.active]="activeSection === 'typography'" (click)="showSection('typography')">
+        <span class="snav-icon">🔤</span><span class="snav-label">Typographie</span>
+      </div>
+      <div class="settings-nav-item" [class.active]="activeSection === 'seo'" (click)="showSection('seo')">
+        <span class="snav-icon">🔍</span><span class="snav-label">SEO & Méta</span>
+      </div>
+      <div class="settings-nav-item" [class.active]="activeSection === 'social'" (click)="showSection('social')">
+        <span class="snav-icon">🌐</span><span class="snav-label">Réseaux Sociaux</span>
+      </div>
+      <div class="settings-nav-item" [class.active]="activeSection === 'notifications'" (click)="showSection('notifications')">
+        <span class="snav-icon">🔔</span><span class="snav-label">Notifications</span>
+      </div>
+      <div class="settings-nav-item" [class.active]="activeSection === 'securite'" (click)="showSection('securite')">
+        <span class="snav-icon">🔐</span><span class="snav-label">Sécurité</span>
+      </div>
+      <div class="settings-nav-item" [class.active]="activeSection === 'avance'" (click)="showSection('avance')">
+        <span class="snav-icon">⚡</span><span class="snav-label">Avancé</span>
+      </div>
+
+      <!-- NEW: GLOBAL SAVE BUTTON IN NAV -->
+      <div style="margin-top:auto; padding: 1rem 0;">
+        <button class="btn-save" style="width:100%; height:44px; justify-content:center; background:linear-gradient(135deg,var(--red),var(--violet));" (click)="saveAll()">
+          <span>💾 Tout enregistrer</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- SETTINGS SECTIONS -->
+    <div class="settings-sections">
+
+      <!-- ── APPARENCE ── -->
+      <div class="section-block" [class.active]="activeSection === 'apparence'">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Thème & Palette</div>
+            <button class="btn-save" (click)="saveSection('apparence')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="palette-label">Thèmes prédéfinis</div>
+            <div class="theme-cards">
+              <div class="theme-card" [class.selected]="settings.theme === 'kadmiel'" (click)="selectTheme('kadmiel')">
+                <div class="theme-check">✓</div>
+                <div class="theme-card-preview" style="background:#070B14;">
+                  <div class="theme-card-bar" style="background:#0C1220;">
+                    <div class="theme-bar-dot" style="background:#FF3B3B;"></div>
+                    <div class="theme-bar-dot" style="background:#FBBF24;"></div>
+                    <div class="theme-bar-dot" style="background:#22C55E;"></div>
+                  </div>
+                  <div class="theme-card-content">
+                    <div class="theme-card-line" style="background:linear-gradient(90deg,#FF3B3B,#7C3AED);width:80%;"></div>
+                    <div class="theme-card-line" style="background:rgba(255,255,255,.15);width:60%;"></div>
+                    <div class="theme-card-line" style="background:rgba(255,255,255,.08);width:40%;"></div>
+                  </div>
+                </div>
+                <div class="theme-name">KADMIEL SIGNATURE</div>
+              </div>
+              <div class="theme-card" [class.selected]="settings.theme === 'cyber'" (click)="selectTheme('cyber')">
+                <div class="theme-check">✓</div>
+                <div class="theme-card-preview" style="background:#000A0A;">
+                  <div class="theme-card-bar" style="background:#001a1a;">
+                    <div class="theme-bar-dot" style="background:#00FF88;"></div>
+                  </div>
+                  <div class="theme-card-content">
+                    <div class="theme-card-line" style="background:linear-gradient(90deg,#00FF88,#00BFFF);width:80%;"></div>
+                    <div class="theme-card-line" style="background:rgba(0,255,136,.15);width:55%;"></div>
+                  </div>
+                </div>
+                <div class="theme-name">CYBER GREEN</div>
+              </div>
+              <div class="theme-card" [class.selected]="settings.theme === 'neon'" (click)="selectTheme('neon')">
+                <div class="theme-check">✓</div>
+                <div class="theme-card-preview" style="background:#0a000f;">
+                  <div class="theme-card-bar" style="background:#12001f;">
+                    <div class="theme-bar-dot" style="background:#FF00FF;"></div>
+                  </div>
+                  <div class="theme-card-content">
+                    <div class="theme-card-line" style="background:linear-gradient(90deg,#FF00FF,#00CFFF);width:80%;"></div>
+                    <div class="theme-card-line" style="background:rgba(255,0,255,.15);width:50%;"></div>
+                  </div>
+                </div>
+                <div class="theme-name">NEON TOKYO</div>
+              </div>
+              <div class="theme-card" [class.selected]="settings.theme === 'gold'" (click)="selectTheme('gold')">
+                <div class="theme-check">✓</div>
+                <div class="theme-card-preview" style="background:#0A0800;">
+                  <div class="theme-card-bar" style="background:#1a1400;">
+                    <div class="theme-bar-dot" style="background:#FFD700;"></div>
+                  </div>
+                  <div class="theme-card-content">
+                    <div class="theme-card-line" style="background:linear-gradient(90deg,#FFD700,#FF8C00);width:80%;"></div>
+                    <div class="theme-card-line" style="background:rgba(255,215,0,.15);width:55%;"></div>
+                  </div>
+                </div>
+                <div class="theme-name">GOLD PREMIUM</div>
+              </div>
+              <div class="theme-card" [class.selected]="settings.theme === 'ice'" (click)="selectTheme('ice')">
+                <div class="theme-check">✓</div>
+                <div class="theme-card-preview" style="background:#f0f4ff;">
+                  <div class="theme-card-bar" style="background:#fff;">
+                    <div class="theme-bar-dot" style="background:#4F46E5;"></div>
+                  </div>
+                  <div class="theme-card-content">
+                    <div class="theme-card-line" style="background:linear-gradient(90deg,#4F46E5,#06B6D4);width:80%;"></div>
+                    <div class="theme-card-line" style="background:rgba(79,70,229,.15);width:55%;"></div>
+                  </div>
+                </div>
+                <div class="theme-name">ICE LIGHT</div>
+              </div>
+            </div>
+
+            <div style="margin-top:1.6rem;">
+              <div class="palette-label">Couleurs personnalisées</div>
+              <div class="color-pickers-row">
+                <div class="color-picker-item">
+                  <div class="color-picker-label">Fond principal</div>
+                  <div class="color-picker-wrap">
+                    <div class="color-swatch" [style.background]="settings.colors.bg" [style.box-shadow]="'0 0 8px ' + settings.colors.bg"></div>
+                    <input class="color-hex" type="text" [(ngModel)]="settings.colors.bg" maxlength="7">
+                  </div>
+                </div>
+                <div class="color-picker-item">
+                  <div class="color-picker-label">Accent principal</div>
+                  <div class="color-picker-wrap">
+                    <div class="color-swatch" [style.background]="settings.colors.primary" [style.box-shadow]="'0 0 8px ' + settings.colors.primary"></div>
+                    <input class="color-hex" type="text" [(ngModel)]="settings.colors.primary" maxlength="7">
+                  </div>
+                </div>
+                <div class="color-picker-item">
+                  <div class="color-picker-label">Accent secondaire</div>
+                  <div class="color-picker-wrap">
+                    <div class="color-swatch" [style.background]="settings.colors.secondary" [style.box-shadow]="'0 0 8px ' + settings.colors.secondary"></div>
+                    <input class="color-hex" type="text" [(ngModel)]="settings.colors.secondary" maxlength="7">
+                  </div>
+                </div>
+                <div class="color-picker-item">
+                  <div class="color-picker-label">Texte principal</div>
+                  <div class="color-picker-wrap">
+                    <div class="color-swatch" [style.background]="settings.colors.text" [style.box-shadow]="'0 0 8px ' + settings.colors.text"></div>
+                    <input class="color-hex" type="text" [(ngModel)]="settings.colors.text" maxlength="7">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Affichage & Interface</div>
+            <button class="btn-save" (click)="saveSection('display')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Mode sombre</div>
+                <div class="toggle-desc">Fond noir profond — Actif par défaut</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.display.darkMode">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Animations & effets</div>
+                <div class="toggle-desc">Particules, glow, transitions fluides</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.display.animations">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Curseur personnalisé</div>
+                <div class="toggle-desc">Curseur rouge avec traînée violette</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.display.customCursor">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Grille de fond</div>
+                <div class="toggle-desc">Grille violette subtile en arrière-plan</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.display.bgGrid">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Bouton flottant CV</div>
+                <div class="toggle-desc">CTA fixe "Travaillons ensemble" en bas à droite</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.display.floatingCv">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── HERO ── -->
+      <div class="section-block" [class.active]="activeSection === 'hero'">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Section Hero — Textes</div>
+            <button class="btn-save" (click)="saveSection('hero')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <div class="form-label">Accroche (eyebrow) <div class="form-label-badge">Visible</div></div>
+              <input class="form-input" type="text" [(ngModel)]="settings.hero.eyebrow">
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <div class="form-label">Prénom affiché</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.name">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Titre principal</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.title">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Description courte</div>
+              <textarea class="form-textarea" style="min-height:70px;" [(ngModel)]="settings.hero.description"></textarea>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <div class="form-label">Bouton primaire (rouge)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.cta1">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Bouton secondaire</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.cta2">
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <div class="form-label">Stat 1 (valeur)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.stat1Val">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Stat 1 (libellé)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.stat1Lbl">
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <div class="form-label">Stat 2 (valeur)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.stat2Val">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Stat 2 (libellé)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.stat2Lbl">
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <div class="form-label">Stat 3 (valeur)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.stat3Val">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Stat 3 (libellé)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.hero.stat3Lbl">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Aperçu en temps réel</div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);">Se met à jour à la frappe</span>
+          </div>
+          <div class="panel-body" style="padding-bottom:1.6rem;">
+            <div class="preview-tag">APERÇU PORTFOLIO</div>
+            <div class="hero-preview">
+              <div class="hero-prev-eyebrow">{{ settings.hero.eyebrow }}</div>
+              <div class="hero-prev-name">{{ settings.hero.name }}</div>
+              <div class="hero-prev-title">{{ settings.hero.title }}</div>
+              <div class="hero-prev-desc">{{ settings.hero.description }}</div>
+              <div class="hero-prev-btns">
+                <div class="hero-prev-btn hero-prev-btn-primary">{{ settings.hero.cta1 }}</div>
+                <div class="hero-prev-btn hero-prev-btn-outline">{{ settings.hero.cta2 }}</div>
+              </div>
+              <div style="display:flex; gap:1rem; margin-top:1rem; font-size:.65rem; color:var(--muted);">
+                <div><strong>{{ settings.hero.stat1Val }}</strong> {{ settings.hero.stat1Lbl }}</div>
+                <div><strong>{{ settings.hero.stat2Val }}</strong> {{ settings.hero.stat2Lbl }}</div>
+                <div><strong>{{ settings.hero.stat3Val }}</strong> {{ settings.hero.stat3Lbl }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LOGO ── -->
+      <div class="section-block" [class.active]="activeSection === 'branding'">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Logo & Identité visuelle</div>
+            <button class="btn-save" (click)="saveSection('branding')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <div class="form-label">Type de logo à utiliser</div>
+              <div style="display: flex; gap: 1rem;">
+                <label class="choice-card" [class.selected]="settings.branding.logoType === 'text'" style="flex: 1; cursor: pointer;">
+                  <input type="radio" name="logoType" value="text" [(ngModel)]="settings.branding.logoType" style="display: none;">
+                  <div style="text-align: center; padding: 0.8rem; border: 1.5px solid var(--border); border-radius: 8px; transition: all 0.3s;" 
+                       [style.borderColor]="settings.branding.logoType === 'text' ? 'var(--red)' : ''"
+                       [style.background]="settings.branding.logoType === 'text' ? 'rgba(255,59,59,0.05)' : ''">
+                    <span style="display: block; font-size: 1.2rem; margin-bottom: 0.3rem;">🔤</span>
+                    <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Initiales / Texte</span>
+                  </div>
+                </label>
+                <label class="choice-card" [class.selected]="settings.branding.logoType === 'image'" style="flex: 1; cursor: pointer;">
+                  <input type="radio" name="logoType" value="image" [(ngModel)]="settings.branding.logoType" style="display: none;">
+                  <div style="text-align: center; padding: 0.8rem; border: 1.5px solid var(--border); border-radius: 8px; transition: all 0.3s;"
+                       [style.borderColor]="settings.branding.logoType === 'image' ? 'var(--red)' : ''"
+                       [style.background]="settings.branding.logoType === 'image' ? 'rgba(255,59,59,0.05)' : ''">
+                    <span style="display: block; font-size: 1.2rem; margin-bottom: 0.3rem;">🖼️</span>
+                    <span style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Image / Icône</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <div class="form-label">Texte du logo (initiales)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.branding.logoText" maxlength="5">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Sous-titre logo (sidebar)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.branding.logoSub">
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <div class="form-label">Nom complet (Footer)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.branding.fullName">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Ville & Pays (Footer)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.branding.location">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Texte des droits (Footer)</div>
+              <input class="form-input" type="text" [(ngModel)]="settings.branding.footerRights">
+            </div>
+            <div class="logo-upload-area" (click)="logoFile.click()" [style.borderColor]="settings.branding.logoImage ? 'var(--red)' : ''">
+              <ng-container *ngIf="!settings.branding.logoImage">
+                <span class="logo-upload-icon">🖼️</span>
+                <div class="logo-upload-text">Glissez votre logo ici ou cliquez pour parcourir</div>
+                <div class="logo-upload-sub">PNG, SVG, WebP — max 2 Mo — recommandé : 200×200px</div>
+              </ng-container>
+              <ng-container *ngIf="settings.branding.logoImage">
+                <img [src]="settings.branding.logoImage" style="max-height: 80px; max-width: 100%; border-radius: 4px; margin-bottom: 0.5rem;">
+                <div class="logo-upload-text" style="color: var(--red);">Logo sélectionné — Cliquez pour changer</div>
+              </ng-container>
+              <input type="file" #logoFile accept="image/*" style="display:none;" (change)="handleLogoUpload($event)">
+            </div>
+            <div class="logo-preview-row">
+              <div class="logo-preview-item">
+                <div class="logo-box logo-box-lg"
+                  style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(255,59,59,.15));
+                  border:1px solid rgba(124,58,237,.4);font-family:'Orbitron',sans-serif;
+                  font-weight:900;color:var(--violet); overflow: hidden;">
+                  <img *ngIf="settings.branding.logoType === 'image' && settings.branding.logoImage" [src]="settings.branding.logoImage" style="width: 100%; height: 100%; object-fit: contain;">
+                  <span *ngIf="settings.branding.logoType === 'text' || !settings.branding.logoImage">{{ settings.branding.logoText }}</span>
+                </div>
+                <div class="logo-preview-label">Large (64px)</div>
+              </div>
+              <div class="logo-preview-item">
+                <div class="logo-box logo-box-md"
+                  style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(255,59,59,.15));
+                  border:1px solid rgba(124,58,237,.4);font-family:'Orbitron',sans-serif;
+                  font-weight:900;color:var(--violet);font-size:.75rem; overflow: hidden;">
+                  <img *ngIf="settings.branding.logoType === 'image' && settings.branding.logoImage" [src]="settings.branding.logoImage" style="width: 100%; height: 100%; object-fit: contain;">
+                  <span *ngIf="settings.branding.logoType === 'text' || !settings.branding.logoImage">{{ settings.branding.logoText }}</span>
+                </div>
+                <div class="logo-preview-label">Medium (44px)</div>
+              </div>
+              <div class="logo-preview-item">
+                <div class="logo-box logo-box-sm"
+                  style="background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(255,59,59,.15));
+                  border:1px solid rgba(124,58,237,.4);font-family:'Orbitron',sans-serif;
+                  font-weight:900;color:var(--violet);font-size:.55rem; overflow: hidden;">
+                  <img *ngIf="settings.branding.logoType === 'image' && settings.branding.logoImage" [src]="settings.branding.logoImage" style="width: 100%; height: 100%; object-fit: contain;">
+                  <span *ngIf="settings.branding.logoType === 'text' || !settings.branding.logoImage">{{ settings.branding.logoText }}</span>
+                </div>
+                <div class="logo-preview-label">Small (32px)</div>
+              </div>
+              <div class="logo-preview-item">
+                <div style="background:var(--bg2);border:1px solid var(--border);padding:.6rem 1rem;
+                  border-radius:8px;font-family:'Orbitron',sans-serif;font-size:.78rem;font-weight:900;
+                  background:linear-gradient(90deg,var(--red),var(--violet));
+                  -webkit-background-clip: text;
+                  background-clip: text;
+                  -webkit-text-fill-color: transparent; display: flex; align-items: center; justify-content: center; min-height: 40px;">
+                  <img *ngIf="settings.branding.logoType === 'image' && settings.branding.logoImage" [src]="settings.branding.logoImage" style="max-height: 30px; width: auto; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">
+                  <span *ngIf="settings.branding.logoType === 'text' || !settings.branding.logoImage">{{ settings.branding.logoText }}</span>
+                </div>
+                <div class="logo-preview-label">Gradient</div>
+              </div>
+            </div>
+            <div style="margin-top:1.2rem;">
+              <div class="form-label" style="margin-bottom:.7rem;">Favicon (icône onglet)</div>
+              <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                <div style="width:32px;height:32px;border-radius:6px;
+                  background:linear-gradient(135deg,var(--violet),var(--red));
+                  display:flex;align-items:center;justify-content:center;
+                  font-family:'Orbitron',sans-serif;font-size:.55rem;font-weight:900;color:#fff;">KT</div>
+                <button class="btn-secondary" (click)="showToast('📌 Favicon généré automatiquement depuis le logo.','info')">🔄 Générer favicon</button>
+                <button class="btn-secondary">📤 Importer .ico</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TYPOGRAPHIE ── -->
+      <div class="section-block" [class.active]="activeSection === 'typography'">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Polices de caractères</div>
+            <button class="btn-save" (click)="saveSection('typography')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="form-group" style="margin-bottom:1.4rem;">
+              <div class="form-label">Police des titres</div>
+              <div class="font-cards">
+                <div class="font-card" [class.selected]="settings.typography.titleFont === 'orbitron'" (click)="selFont('title','orbitron')">
+                  <div class="font-card-check">✓</div>
+                  <div class="font-card-name" style="font-family:'Orbitron',sans-serif;">ORBITRON</div>
+                  <div class="font-card-sample" style="font-family:'Orbitron',sans-serif;font-size:.72rem;">KADMIEL</div>
+                  <span class="font-card-badge">Recommandé</span>
+                </div>
+                <div class="font-card" [class.selected]="settings.typography.titleFont === 'space'" (click)="selFont('title','space')">
+                  <div class="font-card-check">✓</div>
+                  <div class="font-card-name">Space Mono</div>
+                  <div class="font-card-sample" style="font-family:monospace;font-size:.72rem;">KADMIEL</div>
+                  <span class="font-card-badge">Mono</span>
+                </div>
+                <div class="font-card" [class.selected]="settings.typography.titleFont === 'rajdhani'" (click)="selFont('title','rajdhani')">
+                  <div class="font-card-check">✓</div>
+                  <div class="font-card-name">Rajdhani</div>
+                  <div class="font-card-sample" style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;">KADMIEL</div>
+                  <span class="font-card-badge">Moderne</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:1.4rem;">
+              <div class="form-label">Police du corps</div>
+              <div class="font-cards">
+                <div class="font-card" [class.selected]="settings.typography.bodyFont === 'syne'" (click)="selFont('body','syne')">
+                  <div class="font-card-check">✓</div>
+                  <div class="font-card-name" style="font-family:'Syne',sans-serif;">Syne</div>
+                  <div class="font-card-sample">Développeur passionné</div>
+                  <span class="font-card-badge">Recommandé</span>
+                </div>
+                <div class="font-card" [class.selected]="settings.typography.bodyFont === 'inter'" (click)="selFont('body','inter')">
+                  <div class="font-card-check">✓</div>
+                  <div class="font-card-name">Inter</div>
+                  <div class="font-card-sample" style="font-family:sans-serif;">Développeur passionné</div>
+                  <span class="font-card-badge">Lisibilité</span>
+                </div>
+                <div class="font-card" [class.selected]="settings.typography.bodyFont === 'manrope'" (click)="selFont('body','manrope')">
+                  <div class="font-card-check">✓</div>
+                  <div class="font-card-name">Manrope</div>
+                  <div class="font-card-sample">Développeur passionné</div>
+                  <span class="font-card-badge">Élégant</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <div class="form-label">Taille du corps</div>
+                <select class="form-select" [(ngModel)]="settings.typography.fontSize">
+                  <option>14px — Compact</option>
+                  <option selected>16px — Standard</option>
+                  <option>18px — Large</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <div class="form-label">Espacement des lignes</div>
+                <select class="form-select" [(ngModel)]="settings.typography.lineHeight">
+                  <option>1.5 — Serré</option>
+                  <option selected>1.75 — Standard</option>
+                  <option>2.0 — Aéré</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SEO ── -->
+      <div class="section-block" [class.active]="activeSection === 'seo'">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>SEO & Méta-données</div>
+            <button class="btn-save" (click)="saveSection('seo')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <div class="form-label">Titre de la page (balise title)</div>
+              <input class="form-input" type="text" [(ngModel)]="settings.seo.title">
+              <div class="form-hint">Idéal : 50–60 caractères</div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Description méta</div>
+              <textarea class="form-textarea" style="min-height:80px;" [(ngModel)]="settings.seo.description"></textarea>
+              <div class="form-hint">Idéal : 150–160 caractères</div>
+            </div>
+            <div class="form-row-2">
+              <div class="form-group">
+                <div class="form-label">URL canonique</div>
+                <input class="form-input" type="url" [(ngModel)]="settings.seo.url">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Mots-clés (séparés par des virgules)</div>
+                <input class="form-input" type="text" [(ngModel)]="settings.seo.keywords">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <div class="form-label">Open Graph (réseaux sociaux)</div>
+              <input class="form-input" type="text" placeholder="Titre OG" [(ngModel)]="settings.seo.ogTitle">
+            </div>
+
+            <!-- SEO Preview -->
+            <div class="seo-preview">
+              <div class="seo-prev-title">{{ settings.seo.title }}</div>
+              <div class="seo-prev-url">{{ settings.seo.url }}</div>
+              <div class="seo-prev-desc">{{ settings.seo.description }}</div>
+            </div>
+            <div class="seo-meter">
+              <div class="seo-meter-item"><div class="seo-meter-dot" style="background:var(--green);"></div><span class="seo-meter-label">Titre ✓</span></div>
+              <div class="seo-meter-item"><div class="seo-meter-dot" style="background:var(--green);"></div><span class="seo-meter-label">Description ✓</span></div>
+              <div class="seo-meter-item"><div class="seo-meter-dot" style="background:var(--green);"></div><span class="seo-meter-label">Canonical ✓</span></div>
+              <div class="seo-meter-item"><div class="seo-meter-dot" style="background:var(--yellow);"></div><span class="seo-meter-label">OG Image — à définir</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RÉSEAUX SOCIAUX ── -->
+      <div class="section-block" [class.active]="activeSection === 'social'">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Réseaux Sociaux</div>
+            <button class="btn-save" (click)="saveSection('social')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <div class="form-label">LinkedIn</div>
+              <div style="display:flex;gap:0.5rem;">
+                <div style="width:40px;height:40px;background:#0A66C2;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">in</div>
+                <input class="form-input" type="url" [(ngModel)]="settings.social.linkedin" placeholder="https://linkedin.com/in/...">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">GitHub</div>
+              <div style="display:flex;gap:0.5rem;">
+                <div style="width:40px;height:40px;background:#333;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">gh</div>
+                <input class="form-input" type="url" [(ngModel)]="settings.social.github" placeholder="https://github.com/...">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Twitter / X</div>
+              <div style="display:flex;gap:0.5rem;">
+                <div style="width:40px;height:40px;background:#000;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">𝕏</div>
+                <input class="form-input" type="url" [(ngModel)]="settings.social.twitter" placeholder="https://twitter.com/...">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">Instagram</div>
+              <div style="display:flex;gap:0.5rem;">
+                <div style="width:40px;height:40px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">ig</div>
+                <input class="form-input" type="url" [(ngModel)]="settings.social.instagram" placeholder="https://instagram.com/...">
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="form-label">WhatsApp (Lien wa.me)</div>
+              <div style="display:flex;gap:0.5rem;">
+                <div style="width:40px;height:40px;background:#25D366;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;">wa</div>
+                <input class="form-input" type="url" [(ngModel)]="settings.social.whatsapp" placeholder="https://wa.me/...">
+              </div>
+              <div class="form-hint">Exemple: https://wa.me/33612345678</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── NOTIFICATIONS ── -->
+      <div class="section-block" [class.active]="activeSection === 'notifications'">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Préférences de notification</div>
+            <button class="btn-save" (click)="saveSection('notifications')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="notif-section-title">📧 Email</div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Nouveau message reçu</div>
+                <div class="toggle-desc">Email immédiat à {{ settings.notifications.recipientEmail }}</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.notifications.emailNewMessage">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Rapport hebdomadaire</div>
+                <div class="toggle-desc">Résumé des visites, messages et activité (chaque lundi)</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.notifications.emailWeeklyReport">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Pic de trafic</div>
+                <div class="toggle-desc">Alerte si le trafic dépasse 500 visites en 24h</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.notifications.emailTrafficPeak">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+            <div class="notif-section-title">🔔 Back-Office</div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Notifications in-app</div>
+                <div class="toggle-desc">Badge rouge sur l'icône Messages du menu</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.notifications.inAppNotifications">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Son de notification</div>
+                <div class="toggle-desc">Bip discret à la réception d'un message</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.notifications.notificationSound">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+            <div class="form-group" style="margin-top:1.2rem;">
+              <div class="form-label">Email de réception des notifications</div>
+              <input class="form-input" type="email" [(ngModel)]="settings.notifications.recipientEmail">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SÉCURITÉ ── -->
+      <div class="section-block" [class.active]="activeSection === 'securite'">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Sécurité du compte</div>
+            <button class="btn-save" (click)="saveSection('security')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="security-item">
+              <div class="security-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);">🔐</div>
+              <div class="security-info">
+                <div class="security-title">Mot de passe</div>
+                <div class="security-desc">Dernière modification : {{ settings.security.lastPasswordChange }}</div>
+              </div>
+              <span class="security-status status-ok">✓ Sécurisé</span>
+              <button class="btn-secondary" style="margin-left:.8rem;">Modifier</button>
+            </div>
+            <div class="security-item">
+              <div class="security-icon" style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);">📱</div>
+              <div class="security-info">
+                <div class="security-title">Authentification 2FA</div>
+                <div class="security-desc">Double vérification par application mobile</div>
+              </div>
+              <span class="security-status" [class.status-ok]="settings.security.twoFactorEnabled" [class.status-warn]="!settings.security.twoFactorEnabled">
+                {{ settings.security.twoFactorEnabled ? '✓ Activé' : '⚠ Non activé' }}
+              </span>
+              <button class="btn-save-v btn-save" style="margin-left:.8rem;"><span>{{ settings.security.twoFactorEnabled ? 'Gérer' : 'Activer' }}</span></button>
+            </div>
+            <div class="security-item">
+              <div class="security-icon" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);">🌐</div>
+              <div class="security-info">
+                <div class="security-title">Sessions actives</div>
+                <div class="security-desc">{{ settings.security.activeSessions }} session(s) active(s)</div>
+              </div>
+              <span class="security-status status-ok">{{ settings.security.activeSessions }} session(s)</span>
+              <button class="btn-danger" style="margin-left:.8rem;">Révoquer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── AVANCÉ ── -->
+      <div class="section-block" [class.active]="activeSection === 'avance'">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Outils & Intégrations</div>
+            <button class="btn-save" (click)="saveSection('advanced')"><span>💾 Sauvegarder</span></button>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <div class="form-label">Google Analytics ID</div>
+              <input class="form-input" type="text" [(ngModel)]="settings.advanced.googleAnalyticsId">
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-label">Hotjar Tracking</div>
+                <div class="toggle-desc">Enregistrement des sessions utilisateurs</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="settings.advanced.hotjarEnabled">
+                <div class="toggle-track"><div class="toggle-thumb"></div></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="border-color: rgba(255, 59, 59, 0.3);">
+          <div class="panel-head">
+            <div class="panel-title" style="color: var(--red);"><div class="panel-dot"></div>Zone de danger</div>
+          </div>
+          <div class="panel-body danger-zone">
+            <div class="danger-item">
+              <div class="danger-info">
+                <div class="danger-title">Vider le cache système</div>
+                <div class="danger-desc">Force la régénération de toutes les images statiques.</div>
+              </div>
+              <button class="btn-secondary" (click)="clearCache()">Vider</button>
+            </div>
+            <div class="danger-item">
+              <div class="danger-info">
+                <div class="danger-title">Exporter les données</div>
+                <div class="danger-desc">Télécharge une sauvegarde JSON de vos paramètres.</div>
+              </div>
+              <button class="btn-secondary" (click)="exportData()">Exporter</button>
+            </div>
+            <div class="danger-item">
+              <div class="danger-info">
+                <div class="danger-title">Réinitialiser tout</div>
+                <div class="danger-desc">Remet toutes les options à zéro. Attention, action irréversible.</div>
+              </div>
+              <button class="btn-danger" (click)="resetSettings()">Réinitialiser</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" [class.show]="isToastVisible" [ngClass]="'toast-' + toastType">
+  {{ toastMessage }}
+</div>

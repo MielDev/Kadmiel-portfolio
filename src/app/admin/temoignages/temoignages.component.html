@@ -1,1 +1,156 @@
-<p>temoignages works!</p>
+<div class="content">
+  <!-- Header Section -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <div class="panel-dot"></div>
+        Gestion des Témoignages
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <button class="btn-save-main" style="background: var(--accent-violet); box-shadow: var(--glow-violet);" (click)="copyPublicLink()">
+          <span>🔗 Lien Public</span>
+        </button>
+        <button class="btn-save-main" style="background: linear-gradient(90deg, #38BDF8, #7C3AED); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" (click)="generateUniqueLink()">
+          <span>✨ Lien Unique (1 use)</span>
+        </button>
+        <button class="btn-save-main" (click)="openAddModal()">
+          <span>+ Ajouter</span>
+        </button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div *ngIf="loading" class="loading-state">Chargement...</div>
+      
+      <div *ngIf="!loading && testimonials.length === 0" class="empty-state">
+        Aucun témoignage trouvé.
+      </div>
+
+      <div class="table-container" *ngIf="!loading && testimonials.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Entreprise / Rôle</th>
+              <th>Contenu</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of testimonials" [class.pending-row]="t.status === 'pending'">
+              <td>
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                  <div class="avatar-sm">
+                    <img *ngIf="t.photo" [src]="getPhotoUrl(t.photo)" [alt]="t.name" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    <span *ngIf="!t.photo">{{ getInitials(t.name) }}</span>
+                  </div>
+                  <span style="font-weight: 600;">{{ t.name }}</span>
+                </div>
+              </td>
+              <td>
+                <div style="font-size: 0.8rem; color: var(--accent-violet);">{{ t.role }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">{{ t.company }}</div>
+              </td>
+              <td>
+                <div style="max-width: 300px; font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
+                  "{{ (t.content.length > 100) ? (t.content | slice:0:100) + '...' : t.content }}"
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" 
+                      [ngClass]="t.status === 'published' ? 'status-approved' : 'status-pending'"
+                      (click)="toggleStatus(t)"
+                      style="cursor: pointer;">
+                  {{ t.status === 'published' ? 'Publié' : 'Masqué' }}
+                </span>
+              </td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon" (click)="openAddModal(t)">✏️</button>
+                  <button class="btn-icon btn-delete" (click)="openDeleteModal(t.id, t.name)">🗑</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADD/EDIT -->
+<div class="modal-backdrop" [class.open]="showAddModal" (click)="closeAddModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="panel-title">
+        <div class="panel-dot"></div>
+        {{ editingTestimonial ? 'Modifier' : 'Ajouter' }} un témoignage
+      </div>
+      <button class="btn-icon" (click)="closeAddModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+        <div class="avatar-sm" style="width: 80px; height: 80px; font-size: 1.5rem; position: relative; cursor: pointer;" (click)="photoInput.click()">
+          <img *ngIf="testimonialForm.photo" [src]="getPhotoUrl(testimonialForm.photo)" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+          <span *ngIf="!testimonialForm.photo">{{ getInitials(testimonialForm.name) }}</span>
+          <div style="position: absolute; bottom: 0; right: 0; background: var(--accent-violet); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #fff; border: 2px solid var(--bg-card);">
+            📷
+          </div>
+        </div>
+        <input #photoInput type="file" (change)="onPhotoSelected($event)" style="display: none;" accept="image/*">
+      </div>
+      <div *ngIf="testimonialForm.photo" style="text-align: center; margin-top: -1rem; margin-bottom: 1rem;">
+        <button type="button" class="btn-cancel" style="padding: 0.2rem 0.6rem; font-size: 0.7rem; border-color: var(--accent-red); color: var(--accent-red);" (click)="removePhoto()">Supprimer la photo</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="form-label">Nom du client</div>
+          <input type="text" class="form-input" [(ngModel)]="testimonialForm.name" placeholder="Ex: Emmanuel L.">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Entreprise</div>
+          <input type="text" class="form-input" [(ngModel)]="testimonialForm.company" placeholder="Ex: EDS Télécom">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Rôle / Titre professionnel</div>
+        <input type="text" class="form-input" [(ngModel)]="testimonialForm.role" placeholder="Ex: CEO">
+      </div>
+      <div class="form-group">
+        <div class="form-label">Message / Témoignage</div>
+        <textarea class="form-textarea" [(ngModel)]="testimonialForm.content" placeholder="Le message du client..." style="min-height: 120px;"></textarea>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Statut</div>
+        <select class="form-select" name="status" [(ngModel)]="testimonialForm.status">
+          <option value="published">Publié (visible sur le site)</option>
+          <option value="pending">Masqué (brouillon)</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" (click)="closeAddModal()">Annuler</button>
+      <button class="btn-save-modal" (click)="saveTestimonial()">
+        {{ editingTestimonial ? 'Mettre à jour' : 'Enregistrer' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-backdrop" [class.open]="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal" style="max-width: 400px; text-align: center;" (click)="$event.stopPropagation()">
+    <div class="modal-body" style="padding: 3rem 2rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+      <div class="panel-title" style="justify-content: center; margin-bottom: 1rem;">Supprimer le témoignage ?</div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">
+        Voulez-vous vraiment supprimer l'avis de <strong>{{ deleteTestimonialName }}</strong> ? Cette action est irréversible.
+      </p>
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <button class="btn-cancel" (click)="closeDeleteModal()">Annuler</button>
+        <button class="btn-save-modal" style="background: var(--accent-red);" (click)="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>

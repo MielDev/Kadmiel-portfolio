@@ -1,21 +1,31 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
+import { filter, map } from 'rxjs/operators';
+import { MessageService } from '../../services/message.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-admin-navbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './admin-navbar.html',
   styleUrl: './admin-navbar.css'
 })
 export class AdminNavbarComponent implements OnInit, OnDestroy {
   currentTime: string = '';
   currentPage: string = 'Accueil';
+  unreadCount$: Observable<number>;
   private timer: any;
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private messageService: MessageService
+  ) {
+    this.unreadCount$ = this.messageService.messages$.pipe(
+      map(messages => messages.filter(m => m.status === 'unread').length)
+    );
+
     this.updateTime();
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -27,6 +37,9 @@ export class AdminNavbarComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.timer = setInterval(() => this.updateTime(), 1000);
     this.updateBreadcrumb();
+    
+    // On s'assure que les messages sont chargés pour le badge
+    this.messageService.getMessages().subscribe();
   }
 
   ngOnDestroy(): void {
@@ -55,5 +68,6 @@ export class AdminNavbarComponent implements OnInit, OnDestroy {
     else if (url.includes('apropos')) this.currentPage = 'Profil';
     else if (url.includes('temoignages')) this.currentPage = 'Témoignages';
     else if (url.includes('parametres')) this.currentPage = 'Paramètres';
+    else if (url.includes('analytics')) this.currentPage = 'Analytics';
   }
 }

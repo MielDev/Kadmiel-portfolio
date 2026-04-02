@@ -52,6 +52,10 @@ export class AnalyticsService {
   private readonly dailyUrl = `${environment.apiUrl}/analytics/daily`;
   private readonly sourcesUrl = `${environment.apiUrl}/analytics/sources`;
   private readonly countriesUrl = `${environment.apiUrl}/analytics/countries`;
+  private readonly devicesUrl = `${environment.apiUrl}/analytics/devices`;
+  private readonly browsersUrl = `${environment.apiUrl}/analytics/browsers`;
+  private readonly topPagesUrl = `${environment.apiUrl}/analytics/top-pages`;
+  private readonly eventsUrl = `${environment.apiUrl}/analytics/recent-events`;
 
   private lastTrackedEvent: { type: string, path: string, time: number } | null = null;
   private consentSubject = new BehaviorSubject<boolean | null>(this.getInitialConsent());
@@ -170,8 +174,9 @@ export class AnalyticsService {
     );
   }
 
-  getOverview(): Observable<any> {
-    return this.http.get<ApiResponse<any>>(this.overviewUrl).pipe(
+  getOverview(range?: string): Observable<any> {
+    const url = range ? `${this.overviewUrl}?range=${range}` : this.overviewUrl;
+    return this.http.get<ApiResponse<any>>(url).pipe(
       map(response => response.success ? response.data : null),
       catchError(error => {
         console.error('❌ [Analytics] Failed to fetch overview', error);
@@ -180,8 +185,9 @@ export class AnalyticsService {
     );
   }
 
-  getDailyStats(): Observable<any[]> {
-    return this.http.get<ApiResponse<any[]>>(this.dailyUrl).pipe(
+  getDailyStats(range?: string): Observable<any[]> {
+    const url = range ? `${this.dailyUrl}?range=${range}` : this.dailyUrl;
+    return this.http.get<ApiResponse<any[]>>(url).pipe(
       map(response => response.success ? response.data : []),
       catchError(error => {
         console.error('❌ [Analytics] Failed to fetch daily stats', error);
@@ -190,8 +196,9 @@ export class AnalyticsService {
     );
   }
 
-  getSources(): Observable<any[]> {
-    return this.http.get<ApiResponse<any[]>>(this.sourcesUrl).pipe(
+  getSources(range?: string): Observable<any[]> {
+    const url = range ? `${this.sourcesUrl}?range=${range}` : this.sourcesUrl;
+    return this.http.get<ApiResponse<any[]>>(url).pipe(
       map(response => response.success ? response.data : []),
       catchError(error => {
         console.error('❌ [Analytics] Failed to fetch sources', error);
@@ -200,11 +207,55 @@ export class AnalyticsService {
     );
   }
 
-  getCountries(): Observable<any[]> {
-    return this.http.get<ApiResponse<any[]>>(this.countriesUrl).pipe(
+  getCountries(range?: string): Observable<any[]> {
+    const url = range ? `${this.countriesUrl}?range=${range}` : this.countriesUrl;
+    return this.http.get<ApiResponse<any[]>>(url).pipe(
       map(response => response.success ? response.data : []),
       catchError(error => {
         console.error('❌ [Analytics] Failed to fetch countries', error);
+        return of([]);
+      })
+    );
+  }
+
+  getDevices(range?: string): Observable<any[]> {
+    const url = range ? `${this.devicesUrl}?range=${range}` : this.devicesUrl;
+    return this.http.get<ApiResponse<any[]>>(url).pipe(
+      map(response => response.success ? response.data : []),
+      catchError(error => {
+        console.error('❌ [Analytics] Failed to fetch devices', error);
+        return of([]);
+      })
+    );
+  }
+
+  getBrowsers(range?: string): Observable<any[]> {
+    const url = range ? `${this.browsersUrl}?range=${range}` : this.browsersUrl;
+    return this.http.get<ApiResponse<any[]>>(url).pipe(
+      map(response => response.success ? response.data : []),
+      catchError(error => {
+        console.error('❌ [Analytics] Failed to fetch browsers', error);
+        return of([]);
+      })
+    );
+  }
+
+  getTopPages(range?: string): Observable<any[]> {
+    const url = range ? `${this.topPagesUrl}?range=${range}` : this.topPagesUrl;
+    return this.http.get<ApiResponse<any[]>>(url).pipe(
+      map(response => response.success ? response.data : []),
+      catchError(error => {
+        console.error('❌ [Analytics] Failed to fetch top pages', error);
+        return of([]);
+      })
+    );
+  }
+
+  getRecentEvents(): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(this.eventsUrl).pipe(
+      map(response => response.success ? response.data : []),
+      catchError(error => {
+        console.error('❌ [Analytics] Failed to fetch recent events', error);
         return of([]);
       })
     );

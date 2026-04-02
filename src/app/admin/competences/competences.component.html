@@ -1,1 +1,148 @@
-<p>competences works!</p>
+<div class="main">
+  <div class="content">
+
+    <!-- INFO BANNER -->
+    <div class="info-banner">
+      <div class="info-banner-icon">🎯</div>
+      <div class="info-banner-text">
+        <div class="info-banner-title">Section "Mon arsenal tech" du portfolio</div>
+        <div class="info-banner-desc">Ces cards s'affichent dans la section Compétences de ton portfolio public — icône + titre + description + tags technologies.</div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <span style="color:var(--muted);font-size:.9rem;">🔍</span>
+          <input [(ngModel)]="searchTerm" (input)="onSearch()" type="text" placeholder="Rechercher une compétence…">
+        </div>
+        <button class="filter-btn" [class.active]="currentFilter === 'all'" (click)="setFilter('all')">Toutes</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Frontend'" (click)="setFilter('Frontend')">⚡ Frontend</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Backend'" (click)="setFilter('Backend')">🔧 Backend</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'DevOps'" (click)="setFilter('DevOps')">🐳 DevOps</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Mobile'" (click)="setFilter('Mobile')">📱 Mobile</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Design'" (click)="setFilter('Design')">🎨 Design</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Gestion'" (click)="setFilter('Gestion')">📊 Gestion</button>
+      </div>
+      <button class="btn-add" (click)="openAddModal()"><span>✦ Ajouter une carte</span></button>
+    </div>
+
+    <!-- SKILLS GRID -->
+    <div id="skillsContent" *ngIf="filteredSkills.length > 0">
+      <div class="skills-grid">
+        <div *ngFor="let skill of filteredSkills" class="skill-card" [style.--card-color]="getCategoryColor(skill.category || skill.title)">
+          <div class="card-head">
+            <div class="card-icon-box" [style.background]="getCategoryColor(skill.category || skill.title) + '18'" [style.border-color]="getCategoryColor(skill.category || skill.title) + '30'">
+              <i [class]="skill.icon"></i>
+            </div>
+            <div class="card-head-info">
+              <div class="card-name">{{ skill.title }}</div>
+              <span class="card-cat-badge" [style.background]="getCategoryColor(skill.category || skill.title) + '18'" [style.color]="getCategoryColor(skill.category || skill.title)" [style.border]="'1px solid ' + getCategoryColor(skill.category || skill.title) + '30'">
+                {{ skill.category || skill.title }}
+              </span>
+            </div>
+          </div>
+          <div class="card-desc">{{ skill.description }}</div>
+          <div class="skill-tags">
+            <span *ngFor="let tag of skill.technologies" class="tag">{{ tag }}</span>
+          </div>
+          <div class="card-footer">
+            <div class="card-actions">
+              <button class="btn-act btn-edit" (click)="openEditModal(skill)">✏️ Éditer</button>
+              <button class="btn-act btn-del" (click)="openDeleteModal(skill)">🗑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="filteredSkills.length === 0">
+      <div class="empty-icon">🛠️</div>
+      <div class="empty-title">Aucune carte trouvée</div>
+      <div class="empty-desc">Modifiez votre recherche ou ajoutez une nouvelle carte.</div>
+      <button class="btn-add" style="margin:0 auto;" (click)="openAddModal()"><span>✦ Ajouter</span></button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div class="modal-backdrop" *ngIf="showModal" (click)="$event.target === $event.currentTarget && closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">
+        <span *ngIf="!isEditing">Nouvelle carte</span>
+        <span *ngIf="isEditing">Modifier la carte</span>
+      </div>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">Nom <span class="req">*</span></div>
+          <input class="form-input" [(ngModel)]="formData.title" type="text" placeholder="Ex: Frontend">
+        </div>
+        <div class="form-group">
+          <div class="form-label">Catégorie <span class="req">*</span></div>
+          <select class="form-select" [(ngModel)]="formData.category">
+            <option value="Frontend">Frontend</option>
+            <option value="Backend">Backend</option>
+            <option value="Base de données">Base de données</option>
+            <option value="DevOps">DevOps</option>
+            <option value="Mobile">Mobile</option>
+            <option value="Sécurité">Sécurité</option>
+            <option value="Design">Design</option>
+            <option value="Gestion">Gestion</option>
+            <option value="Analytics">Analytics</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Description</div>
+        <textarea class="form-textarea" [(ngModel)]="formData.description" placeholder="Interfaces modernes, réactives et accessibles."></textarea>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Technologies / Tags</div>
+        <div class="tags-edit-wrap">
+          <div class="tag-pill" *ngFor="let tag of formData.technologies">
+            <span>{{ tag }}</span>
+            <button class="tag-pill-del" (click)="removeTag(tag)">×</button>
+          </div>
+          <div class="tag-input-group">
+            <input class="tag-pill-input" [(ngModel)]="newTag" (keyup.enter)="addTag()" (keydown)="onTagInputKeyDown($event)" placeholder="Ajouter un tag…">
+            <button class="btn-add-tag" (click)="addTag()" [disabled]="!newTag.trim()">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Icône</div>
+        <div class="icon-picker">
+          <div *ngFor="let icon of ICONS" class="icon-opt" [class.selected]="formData.icon === icon.class" (click)="selectIcon(icon.class)" [title]="icon.name">
+            <i [class]="icon.class"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" (click)="closeModal()">Annuler</button>
+      <button class="btn-save" (click)="saveSkill()">
+        <span *ngIf="!isEditing">💾 Enregistrer</span>
+        <span *ngIf="isEditing">💾 Mettre à jour</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="modal-backdrop" *ngIf="showDeleteModal" (click)="$event.target === $event.currentTarget && closeDeleteModal()">
+  <div class="confirm-modal">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title">Supprimer la carte ?</div>
+    <div class="confirm-text"><strong>"{{ deleteName }}"</strong> sera retirée de ton portfolio.</div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="closeDeleteModal()">Annuler</button>
+      <button class="btn-confirm-del" (click)="confirmDelete()">🗑 Supprimer</button>
+    </div>
+  </div>
+</div>

@@ -1,1 +1,217 @@
-<p>projets works!</p>
+<!-- CONTENT -->
+<div class="content">
+
+    <!-- MINI STATS -->
+    <div class="mini-stats">
+      <div class="mini-stat">
+        <span class="mini-stat-icon">📁</span>
+        <div>
+          <div class="mini-stat-val">{{ stats.total }}</div>
+          <div class="mini-stat-label">Total projets</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-icon">🟢</span>
+        <div>
+          <div class="mini-stat-val" style="color:var(--green);">{{ stats.live }}</div>
+          <div class="mini-stat-label">En ligne</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-icon">⏸️</span>
+        <div>
+          <div class="mini-stat-val" style="color:var(--muted2);">{{ stats.pause }}</div>
+          <div class="mini-stat-label">En pause</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-icon">📦</span>
+        <div>
+          <div class="mini-stat-val" style="color:var(--yellow);">{{ stats.archive }}</div>
+          <div class="mini-stat-label">Archivés</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-icon">👁️</span>
+        <div>
+          <div class="mini-stat-val" style="color:var(--blue);">{{ stats.views | number:'1.0-0':'fr-FR' }}</div>
+          <div class="mini-stat-label">Vues totales</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <span style="color:var(--muted);font-size:.9rem;">🔍</span>
+          <input [(ngModel)]="searchQuery" type="text" placeholder="Rechercher un projet…">
+        </div>
+        <button class="filter-btn" [class.active]="currentFilter === 'all'" (click)="setFilter('all')">Tous</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'live'" (click)="setFilter('live')">🟢 En ligne</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'pause'" (click)="setFilter('pause')">⏸ Pause</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'archive'" (click)="setFilter('archive')">📦 Archive</button>
+        <div class="view-toggle">
+          <button class="view-btn" [class.active]="currentView === 'grid'" (click)="setView('grid')" title="Grille">⊞</button>
+          <button class="view-btn" [class.active]="currentView === 'list'" (click)="setView('list')" title="Liste">☰</button>
+        </div>
+      </div>
+      <button class="btn-add" (click)="openModal()"><span>✦ Nouveau projet</span></button>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div *ngIf="loading" class="loading-overlay">
+      <div class="loader"></div>
+      <p>Chargement des projets...</p>
+    </div>
+
+    <!-- PROJECTS GRID -->
+    <div *ngIf="!loading" class="projects-grid" [class.list-view]="currentView === 'list'" id="projectsGrid">
+      <div *ngFor="let p of filteredProjects; let i = index" class="proj-card" [style.animation-delay]="i * 0.06 + 's'">
+        <div class="card-thumb">
+          <img [src]="getImageUrl(p.image)" [alt]="p.title" class="card-thumb-img">
+          <div class="card-thumb-overlay"></div>
+          <div class="card-thumb-year">{{ p.year | date:'yyyy' }}</div>
+          <div class="card-thumb-status" [ngClass]="{
+            's-live': p.status === 'live' || !p.status,
+            's-pause': p.status === 'pause',
+            's-dev': p.status === 'archive'
+          }">
+            <div class="s-dot"></div>
+            {{ p.status === 'live' || !p.status ? 'En ligne' : p.status === 'pause' ? 'En pause' : 'Archive' }}
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-cat">{{ p.cat || 'Développement' }}</div>
+          <div class="card-title">{{ p.title }}</div>
+          <div class="card-desc">{{ p.description }}</div>
+          <div class="card-tags">
+            <span *ngFor="let tag of p.tags" class="card-tag">{{ tag }}</span>
+          </div>
+          <div class="card-meta">
+            <div class="card-views">👁 {{ (p.views || 0) | number:'1.0-0':'fr-FR' }}</div>
+            <div class="card-date">{{ p.created_at | date:'dd/MM/yyyy' }}</div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-edit" (click)="openEditModal(p.id)">✏️ Éditer</button>
+            <button class="btn-delete" (click)="openDeleteModal(p.id)">🗑 Supprimer</button>
+            <div class="btn-group-links">
+              <a *ngIf="p.demo_url" [href]="p.demo_url" target="_blank" class="btn-view" title="Démo Live" (click)="incrementViewCount(p.id)">🔗 Live</a>
+              <a *ngIf="p.github_url" [href]="p.github_url" target="_blank" class="btn-view" title="Code Source">📂 Repo</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" [style.display]="!loading && filteredProjects.length === 0 ? 'block' : 'none'">
+      <div class="empty-icon">📭</div>
+      <div class="empty-title">Aucun projet trouvé</div>
+      <div class="empty-desc">Essayez de modifier votre recherche ou votre filtre.</div>
+      <button class="btn-add" (click)="openModal()"><span>✦ Créer un projet</span></button>
+    </div>
+
+</div>
+
+<!-- ══ ADD/EDIT MODAL ══ -->
+<div class="modal-backdrop" [class.open]="isModalOpen" (click)="$event.target === modalBackdrop && closeModal()" #modalBackdrop>
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">
+        <div class="modal-title-dot"></div>
+        <span>{{ editingId ? 'Modifier le projet' : 'Nouveau projet' }}</span>
+      </div>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Titre du projet <span class="req">*</span></div>
+          <input class="form-input" [(ngModel)]="fTitle" type="text" placeholder="Ex: E-commerce API">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Catégorie</div>
+          <select class="form-select" [(ngModel)]="fCat">
+            <option value="Application Web">Application Web</option>
+            <option value="Application Mobile">Application Mobile</option>
+            <option value="Plateforme Web">Plateforme Web</option>
+            <option value="Outil Open Source">Outil Open Source</option>
+            <option value="API / Backend">API / Backend</option>
+            <option value="Design UI/UX">Design UI/UX</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Description <span class="req">*</span></div>
+        <textarea class="form-textarea" [(ngModel)]="fDescription" placeholder="Décrivez le projet..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Image du projet <span class="req">*</span></div>
+          <div class="file-upload-wrapper" (click)="triggerImagePicker()" style="cursor: pointer;">
+            <div class="file-label">
+              <span *ngIf="!fImageUrl">Choisir une image...</span>
+              <img *ngIf="fImageUrl" [src]="fImageUrl" class="file-preview">
+            </div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Statut</div>
+          <select class="form-select" [(ngModel)]="fStatus">
+            <option value="live">🟢 En ligne</option>
+            <option value="pause">⏸ En pause</option>
+            <option value="archive">📦 Archivé</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:1.2rem;">
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Tags (séparés par virgule)</div>
+          <input class="form-input" [(ngModel)]="fTags" type="text" placeholder="Node.js, Express, MySQL">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Année</div>
+          <input class="form-input" [(ngModel)]="fYear" type="text" placeholder="Ex: 2026">
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:1.2rem;">
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">GitHub URL</div>
+          <input class="form-input" [(ngModel)]="fGithubUrl" type="url" placeholder="https://github.com/...">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Demo URL</div>
+          <input class="form-input" [(ngModel)]="fDemoUrl" type="url" placeholder="https://demo.com/...">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" (click)="closeModal()">Annuler</button>
+      <button class="btn-save" (click)="saveProject()">
+        <span>{{ editingId ? '✦ Mettre à jour' : '✦ Enregistrer' }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DELETE CONFIRM ══ -->
+<div class="modal-backdrop" [class.open]="isDeleteModalOpen" (click)="$event.target === deleteBackdrop && closeDeleteModal()" #deleteBackdrop>
+  <div class="confirm-modal">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title">Supprimer le projet ?</div>
+    <div class="confirm-text">
+      Cette action est <strong style="color:var(--red);">irréversible</strong>.<br>
+      Le projet <strong style="color:var(--text);">"{{ projectToDeleteName }}"</strong> sera définitivement supprimé.
+    </div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="closeDeleteModal()">Annuler</button>
+      <button class="btn-confirm-del" (click)="confirmDelete()">🗑 Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" [class.show]="toast.show" [ngClass]="'toast-' + toast.type">
+  {{ toast.msg }}
+</div>

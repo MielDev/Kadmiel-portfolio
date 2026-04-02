@@ -1,0 +1,254 @@
+<div class="main">
+  
+
+  <div class="content">
+
+    <!-- MINI STATS -->
+    <div class="mini-stats">
+      <div class="mini-stat">
+        <span class="mini-stat-icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+        <div>
+          <div class="mini-stat-val">{{ stats.total }}</div>
+          <div class="mini-stat-label">Compétences</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-icon"><i class="fa-solid fa-chart-simple"></i></span>
+        <div>
+          <div class="mini-stat-val" style="-webkit-text-fill-color:var(--violet);">{{ stats.avgLevel }}%</div>
+          <div class="mini-stat-label">Niveau moyen</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-icon"><i class="fa-solid fa-star"></i></span>
+        <div>
+          <div class="mini-stat-val" style="-webkit-text-fill-color:var(--green);">{{ stats.experts }}</div>
+          <div class="mini-stat-label">Expert (90%+)</div>
+        </div>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-icon"><i class="fa-solid fa-layer-group"></i></span>
+        <div>
+          <div class="mini-stat-val" style="-webkit-text-fill-color:var(--yellow);">{{ stats.categories }}</div>
+          <div class="mini-stat-label">Catégories</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <span style="color:var(--muted);font-size:.9rem;"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" placeholder="Rechercher une compétence…" [(ngModel)]="searchQuery" (input)="applyFilters()">
+        </div>
+        <button class="filter-btn" [class.active]="currentCat === 'all'" (click)="setCat('all')">Toutes</button>
+        <button class="filter-btn" [class.active]="currentCat === 'hard'" (click)="setCat('hard')"><i class="fa-solid fa-bolt"></i> Hard Skills</button>
+        <button class="filter-btn" [class.active]="currentCat === 'soft'" (click)="setCat('soft')"><i class="fa-solid fa-brain"></i> Soft Skills</button>
+        <select class="sort-select" [(ngModel)]="sortBy" (change)="applyFilters()">
+          <option value="order-asc">Ordre ↑</option>
+          <option value="percent-desc">Niveau ↓</option>
+          <option value="percent-asc">Niveau ↑</option>
+          <option value="name">A → Z</option>
+        </select>
+      </div>
+      <button class="btn-add" (click)="openModal()"><span><i class="fa-solid fa-plus"></i> Nouvelle compétence</span></button>
+    </div>
+
+    <!-- SKILLS CONTENT -->
+    <div *ngIf="filteredSkills.length > 0; else emptyState">
+      <!-- Group by category when showing all -->
+      <ng-container *ngIf="currentCat === 'all'; else singleGrid">
+        <div *ngFor="let group of groupedSkills | keyvalue" class="skills-section">
+          <div class="section-header">
+            <div class="section-header-title">
+              <div class="section-header-dot"></div>
+              <i [class]="catEmoji(group.key)"></i> {{ group.key === 'hard' ? 'Hard Skills' : 'Soft Skills' }}
+            </div>
+            <div class="section-header-line"></div>
+            <div class="section-count">{{ group.value.length }}</div>
+          </div>
+          <div class="skills-grid">
+            <div *ngFor="let s of group.value; let i = index" class="skill-card" style="--card-color: var(--violet)">
+              <div class="card-top">
+                <div class="skill-icon-wrap" style="background: var(--violet)18; border-color: var(--violet)30">
+                  <i [class]="s.icon"></i>
+                </div>
+                <div class="skill-info">
+                  <div class="skill-name">{{ s.title }}</div>
+                  <span class="skill-cat-badge" [attr.style]="catBadgeStyle(s.type)">{{ s.type }}</span>
+                </div>
+              </div>
+              
+              <!-- Description visible uniquement pour les Soft Skills -->
+              <div class="skill-desc" *ngIf="s.type === 'soft'">{{ s.description || '—' }}</div>
+              
+              <!-- Progression visible uniquement pour les Hard Skills -->
+              <div class="level-section" *ngIf="s.type === 'hard'">
+                <div class="level-header">
+                  <span class="level-label">Niveau</span>
+                  <span class="level-value">
+                    {{ s.percent }}% · <span [style.color]="s.levelInfo.color" style="font-size:.7rem;">{{ s.levelInfo.text }}</span>
+                  </span>
+                </div>
+                <div class="level-track">
+                  <div class="level-fill" [style.width]="(s.percent || 0) + '%'" style="--card-color: var(--violet)"></div>
+                </div>
+                <div class="level-dots" style="margin-top:.45rem;">
+                  <div *ngFor="let filled of s.dots" class="level-dot" [class.filled]="filled" style="--card-color: var(--violet)"></div>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="card-xp">Order: {{ s.sort_order || 0 }}</div>
+                <div class="card-actions">
+                  <button class="btn-edit" (click)="openModal(s)"><i class="fa-solid fa-pen"></i> Éditer</button>
+                  <button class="btn-del" (click)="openDeleteModal(s)"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #singleGrid>
+        <div class="skills-grid">
+          <div *ngFor="let s of filteredSkills; let i = index" class="skill-card" style="--card-color: var(--violet)">
+            <div class="card-top">
+              <div class="skill-icon-wrap" style="background: var(--violet)18; border-color: var(--violet)30">
+                <i [class]="s.icon"></i>
+              </div>
+              <div class="skill-info">
+                <div class="skill-name">{{ s.title }}</div>
+                <span class="skill-cat-badge" [attr.style]="catBadgeStyle(s.type)">{{ s.type }}</span>
+              </div>
+            </div>
+            
+            <!-- Description visible uniquement pour les Soft Skills -->
+            <div class="skill-desc" *ngIf="s.type === 'soft'">{{ s.description || '—' }}</div>
+
+            <!-- Progression visible uniquement pour les Hard Skills -->
+            <div class="level-section" *ngIf="s.type === 'hard'">
+              <div class="level-header">
+                <span class="level-label">Niveau</span>
+                <span class="level-value">
+                  {{ s.percent }}% · <span [style.color]="calculateLevelLabel(s.percent || 0).color" style="font-size:.7rem;">{{ calculateLevelLabel(s.percent || 0).text }}</span>
+                </span>
+              </div>
+              <div class="level-track">
+                <div class="level-fill" [style.width]="(s.percent || 0) + '%'" style="--card-color: var(--violet)"></div>
+              </div>
+              <div class="level-dots" style="margin-top:.45rem;">
+                <div *ngFor="let filled of calculateDots(s.percent || 0)" class="level-dot" [class.filled]="filled" style="--card-color: var(--violet)"></div>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <div class="card-xp">Order: {{ s.sort_order || 0 }}</div>
+              <div class="card-actions">
+                <button class="btn-edit" (click)="openModal(s)"><i class="fa-solid fa-pen"></i> Éditer</button>
+                <button class="btn-del" (click)="openDeleteModal(s)"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+        <div class="empty-title">Aucune compétence trouvée</div>
+        <div class="empty-desc">Modifiez votre recherche ou ajoutez une nouvelle compétence.</div>
+        <button class="btn-add" style="margin:0 auto;" (click)="openModal()"><span><i class="fa-solid fa-plus"></i> Ajouter</span></button>
+      </div>
+    </ng-template>
+
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-backdrop" [class.open]="isModalOpen" (click)="$event.target === modalBackdrop && closeModal()" #modalBackdrop>
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">
+        <div class="modal-title-dot"></div>
+        <span>{{ editingId ? 'Modifier la compétence' : 'Nouvelle compétence' }}</span>
+      </div>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Titre <span class="req">*</span></div>
+          <input class="form-input" type="text" placeholder="Ex: Angular, Node.js…" [(ngModel)]="formSkill.title">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Type <span class="req">*</span></div>
+          <select class="form-select" [(ngModel)]="formSkill.type">
+            <option value="hard">Hard Skill</option>
+            <option value="soft">Soft Skill</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Description masquée pour les Hard Skills dans le formulaire -->
+      <div class="form-group" *ngIf="formSkill.type === 'soft'">
+        <div class="form-label">Description</div>
+        <textarea class="form-textarea" placeholder="Décrivez votre expérience avec cette compétence…" [(ngModel)]="formSkill.description"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0;">
+          <div class="form-label">Ordre de tri</div>
+          <input class="form-input" type="number" placeholder="Ex: 1" [(ngModel)]="formSkill.sort_order">
+        </div>
+        
+        <!-- Slider masqué pour les Soft Skills -->
+        <div class="form-group" style="margin-bottom:0;" *ngIf="formSkill.type === 'hard'">
+          <div class="form-label">Niveau (%) <span class="req">*</span></div>
+          <div class="level-slider-wrap">
+            <input class="level-slider" type="range" min="10" max="100" step="5" [(ngModel)]="formSkill.percent">
+            <div class="level-preview">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);">10</span>
+              <div class="level-preview-bar">
+                <div class="level-preview-fill" [style.width]="formSkill.percent + '%'"></div>
+              </div>
+              <div class="level-preview-num">{{ formSkill.percent }}%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:.4rem;">
+        <div class="form-label">Icône</div>
+        <div class="icon-picker">
+          <div *ngFor="let icon of ICONS" 
+               class="icon-opt" 
+               [class.selected]="formSkill.icon === icon" 
+               (click)="formSkill.icon = icon">
+            <i [class]="icon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" (click)="closeModal()">Annuler</button>
+      <button class="btn-save" (click)="saveSkill()">
+        <span>{{ editingId ? '✦ Mettre à jour' : '✦ Enregistrer' }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="modal-backdrop" [class.open]="isDeleteModalOpen" (click)="$event.target === deleteBackdrop && closeDeleteModal()" #deleteBackdrop>
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div class="confirm-title">Supprimer la compétence ?</div>
+    <div class="confirm-text">La compétence <strong style="color:var(--text);">"{{ deleteSkillName }}"</strong> sera définitivement retirée de ton portfolio.</div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="closeDeleteModal()">Annuler</button>
+      <button class="btn-confirm-del" (click)="confirmDelete()"><i class="fa-solid fa-trash"></i> Supprimer</button>
+    </div>
+  </div>
+</div>

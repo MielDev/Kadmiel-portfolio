@@ -1,0 +1,323 @@
+<div class="analytics-container">
+  <!-- CURSOR -->
+  <div class="cur" #cur></div>
+  <div class="cur-ring" #curRing></div>
+
+  <!-- BG -->
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Chargement des statistiques...</p>
+    </div>
+
+    <div class="error-state" *ngIf="!isLoading && errorMessage">
+      <div class="error-icon">⚠️</div>
+      <p>{{ errorMessage }}</p>
+      <button class="btn-retry" (click)="loadData()">Réessayer</button>
+    </div>
+
+    <div class="content" *ngIf="!isLoading && !errorMessage">
+      <!-- RANGE SELECTOR -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="page-title">
+            <span class="title-dot"></span>
+            <h1>Tableau de bord Analytique</h1>
+          </div>
+        </div>
+        <div class="range-tabs">
+          <button *ngFor="let r of ['7j', '30j', '90j']" 
+                  class="range-btn" 
+                  [class.active]="currentRange === r"
+                  (click)="setRange(r)">
+            {{ r }}
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI ROW -->
+      <div class="kpi-row">
+        <div *ngFor="let stat of kpiStats" class="kpi-card" 
+             [style.--kpi-color]="stat.color"
+             [style.--kpi-glow]="stat.color + '14'"
+             [style.--kpi-border]="stat.color + '4D'"
+             [style.--kpi-icon-bg]="stat.color + '1A'"
+             [style.--kpi-icon-border]="stat.color + '33'">
+          <div class="kpi-card-border"></div>
+          <div class="kpi-icon">{{ stat.icon }}</div>
+          <div class="kpi-label">{{ stat.label }}</div>
+          <div class="kpi-value">{{ stat.value }}</div>
+          <div class="kpi-trend">
+            <span class="kpi-trend-val" [ngClass]="stat.trendUp ? 'trend-up' : 'trend-down'">
+              {{ stat.trendUp ? '↑' : '↓' }} {{ stat.trend }}
+            </span>
+            <span class="kpi-period">vs période préc.</span>
+          </div>
+          <canvas class="kpi-spark" [id]="stat.sparkId"></canvas>
+        </div>
+      </div>
+
+      <!-- TRAFFIC + REALTIME -->
+      <div class="grid-2-1">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">
+              <div class="panel-dot"></div>Trafic visiteurs
+            </div>
+            <div class="panel-tabs">
+              <button class="ptab active">Visiteurs</button>
+              <button class="ptab">Pages vues</button>
+              <button class="ptab">Sessions</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-area" style="height:210px;">
+              <canvas #trafficChart style="width:100%;height:100%;"></canvas>
+            </div>
+            <div class="chart-legend">
+              <div class="chart-leg-item">
+                <div class="chart-leg-dot" style="background:var(--violet);"></div>Période actuelle
+              </div>
+              <div class="chart-leg-item">
+                <div class="chart-leg-dot" style="background:rgba(124,58,237,.2);"></div>Moyenne
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="realtime-panel">
+          <div class="rt-head">
+            <div class="rt-title">⚡ Temps réel</div>
+            <div class="rt-live">
+              <div class="rt-live-dot"></div>En direct
+            </div>
+          </div>
+          <div class="rt-number">{{ animatedValues['realtime'] }}</div>
+          <div class="rt-label">visiteurs actifs maintenant</div>
+          <div class="rt-pages">
+            <div class="rt-section-label">Pages actives</div>
+            <div *ngFor="let page of realtimePages" class="rt-page-row">
+              <span class="rt-page-path">{{ page.path }}</span>
+              <span class="rt-page-count">{{ page.count }}</span>
+            </div>
+          </div>
+          <div style="margin-top:1.1rem;">
+            <canvas #rtChart style="width:100%;height:60px;"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOURCES + GEO + DEVICES -->
+      <div class="grid-3">
+        <!-- Sources (Donut) -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Sources de trafic</div>
+          </div>
+          <div class="panel-body">
+            <div class="donut-wrap">
+              <svg width="120" height="120" viewBox="0 0 120 120" class="donut-svg">
+                <circle cx="60" cy="60" r="45" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="14" />
+                <circle *ngFor="let s of sources; let i = index" 
+                        cx="60" cy="60" r="45" fill="none" 
+                        [attr.stroke]="['#7C3AED', '#FF3B3B', '#38BDF8', '#FBBF24'][i % 4]" 
+                        stroke-width="14" stroke-linecap="round"
+                        [attr.stroke-dasharray]="getDonutStroke(s.count)"
+                        [attr.transform]="getDonutRotation(i)"
+                        class="donut-segment" />
+                <text x="60" y="58" text-anchor="middle" fill="#E5E7EB" font-family="Orbitron" font-size="12" font-weight="700">{{ animatedValues['total'] }}</text>
+                <text x="60" y="72" text-anchor="middle" fill="#4B5563" font-family="JetBrains Mono" font-size="6">VISITES</text>
+              </svg>
+              <div class="donut-legend">
+                <div *ngFor="let s of sources.slice(0, 4); let i = index" class="leg-item">
+                  <div class="leg-dot" [style.background]="['#7C3AED', '#FF3B3B', '#38BDF8', '#FBBF24'][i % 4]"></div>
+                  <span class="leg-name">{{ s.source || 'Direct' }}</span>
+                  <span class="leg-pct">{{ getSourcePct(s.count) }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Geo -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Pays</div>
+          </div>
+          <div class="panel-body">
+            <div *ngFor="let geo of geoStats" class="geo-row">
+              <span class="geo-flag-container">
+                <img *ngIf="geo.flagUrl" [src]="geo.flagUrl" class="geo-flag-img" [alt]="geo.name">
+                <span *ngIf="!geo.flagUrl" class="geo-flag-emoji">{{ geo.flag }}</span>
+              </span>
+              <span class="geo-name">{{ geo.name }}</span>
+              <div class="geo-bar">
+                <div class="geo-bar-fill" [style.width]="geo.pct + '%'"></div>
+              </div>
+              <span class="geo-pct">{{ geo.pct }}%</span>
+              <span class="geo-count">{{ geo.count | number }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Devices -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Appareils & Navigateurs</div>
+          </div>
+          <div class="panel-body">
+            <div *ngFor="let device of deviceStats" class="device-row">
+              <div class="device-icon">{{ device.icon }}</div>
+              <span class="device-name">{{ device.name }}</span>
+              <div class="device-bar">
+                <div class="device-bar-fill" [style.width]="device.pct + '%'" [style.background]="device.color"></div>
+              </div>
+              <span class="device-pct">{{ device.pct }}%</span>
+            </div>
+            <div class="device-separator"></div>
+            <div class="browser-grid">
+              <div *ngFor="let browser of browserStats" class="browser-item">
+                <span class="browser-icon">{{ browser.icon }}</span>
+                <span class="browser-name">{{ browser.name }}</span>
+                <span class="browser-pct">{{ browser.pct }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP PAGES + SESSION METRICS -->
+      <div class="grid-2-1">
+        <!-- Top Pages -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title"><div class="panel-dot"></div>Pages les plus visitées</div>
+            <div class="panel-tabs">
+              <button class="ptab active">Vues</button>
+              <button class="ptab">Durée</button>
+            </div>
+          </div>
+          <table class="pages-table">
+            <thead>
+              <tr>
+                <th>Page</th>
+                <th>Vues</th>
+                <th>Tendance</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let page of topPages">
+                <td class="td-path">{{ page.path }}</td>
+                <td class="td-val">{{ page.views | number }}</td>
+                <td class="td-trend" [ngClass]="page.trendUp ? 'change-up' : 'change-down'">
+                  {{ page.trendUp ? '↑' : '↓' }} {{ page.trend }}
+                </td>
+                <td class="td-bar">
+                  <div class="page-mini-bar-wrap">
+                    <div class="page-mini-bar" [style.width]="(page.views / topPages[0].views * 100) + '%'"></div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="metrics-column">
+          <!-- Bounce Rate Gauge -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title"><div class="panel-dot"></div>Taux de rebond</div>
+            </div>
+            <div class="panel-body">
+              <div class="gauge-wrap">
+                <svg class="gauge-svg" width="160" height="90" viewBox="0 0 160 90">
+                  <defs>
+                    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" style="stop-color:#22C55E" />
+                      <stop offset="50%" style="stop-color:#FBBF24" />
+                      <stop offset="100%" style="stop-color:#FF3B3B" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="12" stroke-linecap="round" />
+                  <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="url(#gaugeGrad)" stroke-width="12" stroke-linecap="round"
+                        [attr.stroke-dasharray]="((overview?.bounceRate || 0) * 1.88) + ' 188'" class="gauge-fill" />
+                  <text x="80" y="72" text-anchor="middle" fill="#E5E7EB" font-family="Orbitron" font-size="16" font-weight="700">{{ overview?.bounceRate || 0 }}%</text>
+                </svg>
+                <div class="gauge-desc">
+                  <div class="gauge-status-row">
+                    <span class="gauge-status" [ngClass]="(overview?.bounceRate || 0) < 50 ? 'status-good' : 'status-bad'">
+                      {{ (overview?.bounceRate || 0) < 50 ? 'Excellent' : 'À surveiller' }}
+                    </span>
+                    <span *ngIf="overview?.bounceRateTrend" class="gauge-trend" [ngClass]="overview?.bounceRateTrendUp ? 'trend-bad' : 'trend-good'">
+                      {{ overview?.bounceRateTrendUp ? '↑' : '↓' }} {{ overview?.bounceRateTrend }}
+                    </span>
+                  </div>
+                  <span class="gauge-sub">Référence : 40-55%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Feed -->
+          <div class="panel">
+            <div class="panel-head">
+              <div class="panel-title"><div class="panel-dot"></div>Activité récente</div>
+            </div>
+            <div class="panel-body">
+              <div class="events-feed">
+                <div *ngFor="let event of events.slice(0, 5)" class="event-row">
+                  <div class="event-icon">
+                    <img *ngIf="getCountryCode(event.country) as code" 
+                         [src]="'https://flagcdn.com/w20/' + code.toLowerCase() + '.png'" 
+                         class="event-flag-img" 
+                         [alt]="event.country">
+                    <span *ngIf="!getCountryCode(event.country)">{{ event.icon }}</span>
+                  </div>
+                  <div class="event-content">
+                    <div class="event-text">{{ event.text }}</div>
+                    <div class="event-time">{{ event.time }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WEEKLY HEATMAP -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-head-group">
+            <div class="panel-title"><div class="panel-dot"></div>Intensité du trafic par heure</div>
+            <div class="panel-subtitle">Visualisez vos pics d'audience selon le jour et l'heure de la semaine.</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="heatmap-container">
+            <div class="heatmap-y-axis">
+              <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+            </div>
+            <div class="heatmap-main">
+              <div class="heatmap-x-axis">
+                <span>0h</span><span>4h</span><span>8h</span><span>12h</span><span>16h</span><span>20h</span><span>23h</span>
+              </div>
+              <canvas #heatmapCanvas style="width:100%;height:150px;"></canvas>
+            </div>
+          </div>
+          <div class="heatmap-legend">
+            <span class="h-leg-label">Moins actif</span>
+            <div class="h-leg-bar"></div>
+            <span class="h-leg-label">Plus actif</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end content -->
+  </div>
+</div>

@@ -60,7 +60,9 @@
 .sidebar-logo-text{overflow:hidden;}
 .sidebar-logo-title{font-family:'Orbitron',sans-serif;font-size:.78rem;font-weight:700;
   letter-spacing:.1em;background:linear-gradient(90deg,#fff,var(--violet));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;}
 .sidebar-logo-sub{font-family:'JetBrains Mono',monospace;font-size:.55rem;
   letter-spacing:.18em;color:var(--muted);}
 

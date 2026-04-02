@@ -1,10 +1,10 @@
 export interface Testimonial {
-  id: number;
+  id?: number;
   name: string;
   role: string;
   company: string;
   content: string;
-  photo: string | null;
-  status: 'published' | 'hidden';
-  created_at: string;
+  photo?: string | null;
+  status: 'published' | 'pending';
+  created_at?: string;
 }

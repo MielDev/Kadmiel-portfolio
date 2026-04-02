@@ -6,6 +6,13 @@ export interface Project {
   github_url: string;
   demo_url: string;
   tags: string[];
-  tasks: string[];
-  created_at: string;
+  created_at?: string;
+  updated_at?: string;
+  // Champs optionnels pour la compatibilité UI si nécessaire
+  status?: 'live' | 'pause' | 'archive';
+  year?: string;
+  views?: number;
+  cat?: string;
+  emoji?: string;
+  bg?: string;
 }

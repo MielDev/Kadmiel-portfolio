@@ -1,44 +1,235 @@
-<div class="messages-page">
-  <div class="messages-header">
-    <div>
-      <div class="messages-title">Messages</div>
-      <div class="messages-subtitle">Formulaire de contact</div>
-    </div>
-    <button class="messages-btn" type="button" (click)="refresh()">Rafraîchir</button>
-  </div>
+<div class="main-container">
+  <div class="main">
+    <div class="content">
 
-  @if (error) {
-    <div class="messages-error">{{ error }}</div>
-  }
-
-  @if (isLoading) {
-    <div class="messages-loading">Chargement...</div>
-  } @else {
-    <div class="messages-list">
-      @for (m of messages; track m.id) {
-        <div class="message-card">
-          <div class="message-top">
-            <div class="message-from">
-              <div class="message-name">{{ m.name }}</div>
-              <div class="message-email">{{ m.email }}</div>
-            </div>
-            <div class="message-meta">
-              <div class="message-status">{{ m.status || 'new' }}</div>
-              <div class="message-date">{{ m.created_at ? (m.created_at | date:'dd/MM/yyyy HH:mm') : '' }}</div>
-            </div>
-          </div>
-          <div class="message-subject">{{ m.subject }}</div>
-          <div class="message-content">{{ m.content }}</div>
-          <div class="message-actions">
-            <button class="messages-btn secondary" type="button" (click)="markRead(m)">Marquer lu</button>
-            <button class="messages-btn danger" type="button" (click)="delete(m)">Supprimer</button>
+      <!-- MINI STATS -->
+      <div class="mini-stats">
+        <div class="mini-stat">
+          <span class="mini-stat-icon">📬</span>
+          <div>
+            <div class="mini-stat-val" style="background:linear-gradient(135deg,#fff,var(--violet));-webkit-background-clip: text;background-clip: text;-webkit-text-fill-color: transparent;">{{ messages.length }}</div>
+            <div class="mini-stat-label">Total</div>
           </div>
         </div>
-      }
+        <div class="mini-stat">
+          <span class="mini-stat-icon">🔴</span>
+          <div>
+            <div class="mini-stat-val" style="-webkit-text-fill-color:var(--red);">{{ getUnreadCount() }}</div>
+            <div class="mini-stat-label">Non lus</div>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat-icon">⭐</span>
+          <div>
+            <div class="mini-stat-val" style="-webkit-text-fill-color:var(--yellow);">{{ getStarredCount() }}</div>
+            <div class="mini-stat-label">Favoris</div>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat-icon">📦</span>
+          <div>
+            <div class="mini-stat-val" style="-webkit-text-fill-color:var(--muted2);">{{ getArchivedCount() }}</div>
+            <div class="mini-stat-label">Archivés</div>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat-icon">✅</span>
+          <div>
+            <div class="mini-stat-val" style="-webkit-text-fill-color:var(--green);">{{ getProcessedCount() }}</div>
+            <div class="mini-stat-label">Traités</div>
+          </div>
+        </div>
+      </div>
 
-      @if (messages.length === 0) {
-        <div class="messages-empty">Aucun message pour le moment.</div>
-      }
+      <!-- INBOX LAYOUT -->
+      <div class="inbox-layout">
+
+        <!-- LEFT: INBOX -->
+        <div class="inbox-panel">
+          <div class="inbox-head">
+            <div class="inbox-head-title">
+              <div class="inbox-dot"></div>
+              Boîte de réception
+              <span *ngIf="getUnreadCount() > 0" style="font-family:'JetBrains Mono',monospace;font-size:.65rem;
+                color:var(--red);background:rgba(255,59,59,.1);border:1px solid rgba(255,59,59,.25);
+                padding:.15rem .5rem;border-radius:4px;">
+                {{ getUnreadCount() }} non lu{{ getUnreadCount() > 1 ? 's' : '' }}
+              </span>
+            </div>
+            <div class="inbox-search">
+              <span style="color:var(--muted);font-size:.8rem;">🔍</span>
+              <input type="text" placeholder="Rechercher…" [(ngModel)]="searchQuery" (input)="onSearch()">
+            </div>
+          </div>
+
+          <!-- Bulk bar -->
+          <div class="bulk-bar" [class.show]="checkedMessages.size > 0">
+            <span class="bulk-count">{{ checkedMessages.size }} sélectionné(s)</span>
+            <button class="bulk-btn bulk-read" (click)="bulkMarkRead()">✓ Lus</button>
+            <button class="bulk-btn bulk-del" (click)="bulkDelete()">🗑 Supprimer</button>
+            <button class="bulk-btn" style="border-color:var(--border);color:var(--muted2);" (click)="clearSelection()">✕ Annuler</button>
+          </div>
+
+          <div class="inbox-filters">
+            <button class="inbox-filter" [class.active]="curFilter === 'all'" (click)="setFilter('all')">Tout</button>
+            <button class="inbox-filter active-badge" [class.active]="curFilter === 'unread'" [attr.data-count]="getUnreadCount()" (click)="setFilter('unread')">Non lus</button>
+            <button class="inbox-filter" [class.active]="curFilter === 'read'" (click)="setFilter('read')">Lus</button>
+            <button class="inbox-filter" [class.active]="curFilter === 'starred'" (click)="setFilter('starred')">⭐ Favoris</button>
+            <button class="inbox-filter" [class.active]="curFilter === 'archived'" (click)="setFilter('archived')">📦 Archivés</button>
+          </div>
+
+          <div class="msg-list">
+            <div *ngIf="filteredMessages.length === 0" class="inbox-empty">
+              <div class="inbox-empty-icon">📭</div>
+              <div class="inbox-empty-text">Aucun message dans cette catégorie.</div>
+            </div>
+
+            <div *ngFor="let m of filteredMessages" 
+                 class="msg-row" 
+                 [class.unread]="m.status === 'unread'"
+                 [class.selected]="m.id === selectedId"
+                 (click)="openMsg(m)">
+              <div class="msg-unread-bar"></div>
+              <div class="msg-check-col">
+                <div class="msg-checkbox" 
+                     [class.checked]="checkedMessages.has(m.id)"
+                     (click)="$event.stopPropagation(); toggleCheck(m.id)">
+                  {{ checkedMessages.has(m.id) ? '✓' : '' }}
+                </div>
+              </div>
+              <div class="msg-avatar-col">
+                <div class="msg-avatar" [style.background]="avColor(m.name)">{{ initials(m.name) }}</div>
+              </div>
+              <div class="msg-body" (dblclick)="viewMessage(m)">
+                <div class="msg-top">
+                  <span class="msg-name">{{ m.name }}</span>
+                  <span *ngIf="m.status === 'starred'" style="color:var(--yellow);font-size:.7rem;">⭐</span>
+                  <span *ngIf="m.status === 'archived'" style="font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted);border:1px solid var(--border);padding:.1rem .4rem;border-radius:3px;">archive</span>
+                  <span class="msg-time">{{ m.created_at | date:'dd MMM, HH:mm' }}</span>
+                </div>
+                <div class="msg-subject">{{ m.subject }}</div>
+                <div class="msg-preview">{{ m.content | slice:0:80 }}…</div>
+              </div>
+              <div class="msg-actions-col">
+                <button class="msg-act-btn msg-act-star" (click)="$event.stopPropagation(); toggleStar(m)" [title]="m.status === 'starred' ? 'Retirer' : 'Favoris'">⭐</button>
+                <button class="msg-act-btn msg-act-read" (click)="$event.stopPropagation(); toggleRead(m)" [title]="m.status === 'unread' ? 'Lire' : 'Non lu'">
+                  {{ m.status === 'unread' ? '✓' : '↩' }}
+                </button>
+                <button class="msg-act-btn msg-act-archive" (click)="$event.stopPropagation(); toggleArchive(m)" title="Archiver">📦</button>
+                <button class="msg-act-btn msg-act-del" (click)="$event.stopPropagation(); openDelete(m)" title="Supprimer">🗑</button>
+                <button class="msg-act-btn msg-act-read" (click)="$event.stopPropagation(); viewMessage(m)" title="Voir en grand">👁</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: DETAIL -->
+        <div class="detail-panel">
+          <div *ngIf="!selectedMessage" class="detail-empty">
+            <div class="detail-empty-icon">📭</div>
+            <div class="detail-empty-text">
+              Sélectionnez un message<br>pour le lire ici.
+            </div>
+          </div>
+
+          <div *ngIf="selectedMessage" id="detailContent" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+            <div class="detail-action-bar">
+              <button class="dab-btn dab-read" (click)="toggleRead(selectedMessage)">
+                {{ selectedMessage.status === 'unread' ? '✓ Marquer lu' : '↩ Non lu' }}
+              </button>
+              <button class="dab-btn" (click)="toggleStar(selectedMessage)">
+                {{ selectedMessage.status === 'starred' ? '★ Retirer favori' : '⭐ Favoris' }}
+              </button>
+              <button class="dab-btn" (click)="toggleArchive(selectedMessage)">📦 Archiver</button>
+              <button class="dab-btn" (click)="replyByEmail()">↗ Email</button>
+              <button class="dab-btn dab-del" (click)="openDelete(selectedMessage)">🗑 Supprimer</button>
+            </div>
+            <div class="detail-head">
+              <div class="detail-sender-row">
+                <div class="detail-avatar" [style.background]="avColor(selectedMessage.name)" [style.borderColor]="avColor(selectedMessage.name)">
+                  {{ initials(selectedMessage.name) }}
+                </div>
+                <div>
+                  <div class="detail-sender-name">{{ selectedMessage.name }}</div>
+                  <div class="detail-sender-email">{{ selectedMessage.email }}</div>
+                </div>
+              </div>
+              <div class="detail-subject">{{ selectedMessage.subject }}</div>
+              <div class="detail-sender-meta">
+                <span class="detail-meta-chip">📅 {{ selectedMessage.created_at | date:'dd MMM yyyy, HH:mm' }}</span>
+                <span class="detail-meta-chip">✉️ {{ selectedMessage.email }}</span>
+              </div>
+              <div class="detail-badges" style="margin-top:.7rem;">
+                <span *ngIf="selectedMessage.status !== 'unread'" class="detail-badge badge-read">✓ Lu</span>
+                <span *ngIf="selectedMessage.status === 'unread'" class="detail-badge badge-unread">● Non lu</span>
+                <span *ngIf="selectedMessage.status === 'starred'" class="detail-badge badge-starred">⭐ Favoris</span>
+                <span *ngIf="selectedMessage.status === 'archived'" class="detail-badge badge-archived">📦 Archivé</span>
+              </div>
+            </div>
+            <div class="detail-body">
+              <div class="detail-message">{{ selectedMessage.content }}</div>
+            </div>
+            <div class="detail-footer">
+              <textarea class="reply-textarea" [(ngModel)]="replyText" placeholder="Écrire une réponse à ce message…" (input)="updateReplyChar()"></textarea>
+              <div class="reply-actions">
+                <button class="btn-reply" (click)="sendReply()"><span>📨 Répondre</span></button>
+                <button class="reply-tool-btn" title="Formater">✦</button>
+                <button class="reply-tool-btn" title="Joindre fichier">📎</button>
+                <button class="reply-tool-btn" title="Emoji">😊</button>
+                <span class="reply-char" [style.color]="replyText.length > 450 ? 'var(--red)' : replyText.length > 350 ? 'var(--yellow)' : 'var(--muted)'">
+                  {{ replyText.length }} / 500
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
-  }
+  </div>
+</div>
+
+<!-- VIEW MODAL (POPUP) -->
+<div class="modal-backdrop" [class.open]="showViewModal" (click)="closeView()">
+  <div class="confirm-modal" style="max-width: 800px; text-align: left;" (click)="$event.stopPropagation()">
+    <div class="detail-head">
+      <div class="detail-sender-row">
+        <div class="detail-avatar" *ngIf="viewTarget" [style.background]="avColor(viewTarget.name)" [style.borderColor]="avColor(viewTarget.name)">
+          {{ initials(viewTarget.name) }}
+        </div>
+        <div *ngIf="viewTarget">
+          <div class="detail-sender-name">{{ viewTarget.name }}</div>
+          <div class="detail-sender-email">{{ viewTarget.email }}</div>
+        </div>
+        <button class="btn-cancel" style="margin-left: auto; padding: 0.5rem;" (click)="closeView()">✕</button>
+      </div>
+      <div class="detail-subject" *ngIf="viewTarget">{{ viewTarget.subject }}</div>
+    </div>
+    <div class="detail-body" style="max-height: 400px;">
+      <div class="detail-message" *ngIf="viewTarget">{{ viewTarget.content }}</div>
+    </div>
+    <div class="detail-footer">
+      <div class="reply-actions">
+        <button class="dab-btn" (click)="replyByEmail()">↗ Répondre par Email</button>
+        <button class="btn-cancel" (click)="closeView()">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="modal-backdrop" [class.open]="showDeleteModal" (click)="closeDelete()">
+  <div class="confirm-modal" (click)="$event.stopPropagation()">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title">Supprimer le message ?</div>
+    <div class="confirm-text">Ce message de <strong style="color:var(--text);">"{{ deleteTarget?.name }}"</strong> sera définitivement supprimé.</div>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="closeDelete()">Annuler</button>
+      <button class="btn-confirm-del" (click)="confirmDelete()">🗑 Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" [class.show]="toastMessage" [ngClass]="'toast-' + toastType">
+  {{ toastMessage }}
 </div>

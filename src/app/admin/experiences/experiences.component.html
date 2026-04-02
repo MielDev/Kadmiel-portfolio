@@ -1,1 +1,226 @@
-<p>experiences works!</p>
+<div class="experiences-container">
+  <!-- CURSOR -->
+  <div class="cur" id="cur"></div>
+  <div class="cur-ring" id="curRing"></div>
+
+  <!-- BG -->
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- ══ MAIN ══ -->
+  <div class="main">
+    <div class="content">
+      <!-- MINI STATS -->
+      <div class="mini-stats">
+        <div class="mini-stat">
+          <span class="mini-stat-icon">📁</span>
+          <div>
+            <div class="mini-stat-val" style="background:linear-gradient(135deg,#fff,var(--violet));-webkit-background-clip: text;background-clip: text;-webkit-text-fill-color: transparent;">{{ counts.total }}</div>
+            <div class="mini-stat-label">Total entrées</div>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat-icon">💼</span>
+          <div>
+            <div class="mini-stat-val" style="-webkit-text-fill-color:var(--red);">{{ counts.work }}</div>
+            <div class="mini-stat-label">Emplois</div>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat-icon">📋</span>
+          <div>
+            <div class="mini-stat-val" style="-webkit-text-fill-color:var(--yellow);">{{ counts.stage }}</div>
+            <div class="mini-stat-label">Stages</div>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <span class="mini-stat-icon">🎓</span>
+          <div>
+            <div class="mini-stat-val" style="-webkit-text-fill-color:var(--violet);">{{ counts.edu }}</div>
+            <div class="mini-stat-label">Formations</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOOLBAR -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <span style="color:var(--muted);font-size:.9rem;">🔍</span>
+            <input type="text" placeholder="Rechercher…" [(ngModel)]="searchQuery" (input)="applyFilters()">
+          </div>
+          <button class="filter-btn" [class.active]="curFilter === 'all'" (click)="setFilter('all')">Tout</button>
+          <button class="filter-btn" [class.active]="curFilter === 'work'" (click)="setFilter('work')">💼 Emploi</button>
+          <button class="filter-btn" [class.active]="curFilter === 'stage'" (click)="setFilter('stage')">📋 Stage</button>
+          <button class="filter-btn" [class.active]="curFilter === 'edu'" (click)="setFilter('edu')">🎓 Formation</button>
+          <button class="filter-btn" [class.active]="curFilter === 'freelance'" (click)="setFilter('freelance')">🚀 Freelance</button>
+          
+          <div class="view-toggle">
+            <button class="view-btn" [class.active]="curView === 'grid'" (click)="setView('grid')" title="Grille">⊞</button>
+            <button class="view-btn" [class.active]="curView === 'list'" (click)="setView('list')" title="Liste">☰</button>
+          </div>
+        </div>
+        <button class="btn-add" (click)="openModal()"><span>✦ Ajouter une entrée</span></button>
+      </div>
+
+      <!-- CARDS GRID -->
+      <div *ngIf="curFilter !== 'all'" class="cards-grid" [class.list-view]="curView === 'list'">
+        <ng-container *ngFor="let exp of filteredExperiences; let i = index; trackBy: trackById">
+          <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: exp, index: i }"></ng-container>
+        </ng-container>
+      </div>
+
+      <!-- GROUPED VIEW FOR 'ALL' -->
+      <div *ngIf="curFilter === 'all'">
+        <div *ngFor="let group of groupedExperiences; trackBy: trackByType" class="group-section">
+          <div class="section-divider">
+            <div class="sd-label">
+              <div class="sd-dot" [style.background]="getTypeColor(group.type)" [style.box-shadow]="'0 0 8px ' + getTypeColor(group.type)"></div>
+              {{ getTypeLabel(group.type) }}
+            </div>
+            <div class="sd-line"></div>
+            <div class="sd-count">{{ group.experiences.length }}</div>
+          </div>
+          <div class="cards-grid" [class.list-view]="curView === 'list'" style="margin-bottom: 2rem;">
+            <ng-container *ngFor="let exp of group.experiences; let i = index; trackBy: trackById">
+              <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: exp, index: i }"></ng-container>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state" *ngIf="filteredExperiences.length === 0 && !isLoading">
+        <div class="empty-icon">🏢</div>
+        <div class="empty-title">Aucune entrée trouvée</div>
+        <div class="empty-desc">Essayez un autre filtre ou ajoutez une nouvelle entrée.</div>
+        <button class="btn-add" style="margin:0 auto;" (click)="openModal()"><span>✦ Ajouter</span></button>
+      </div>
+
+      <!-- LOADING STATE -->
+      <div class="empty-state" *ngIf="isLoading">
+        <div class="empty-title">Chargement...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD TEMPLATE -->
+  <ng-template #cardTemplate let-exp let-i="index">
+    <div class="exp-card" [style.animation-delay]="i * 0.06 + 's'" [style.--card-color]="exp.color || getTypeColor(exp.type)">
+      <div class="card-left-bar" [style.background]="'linear-gradient(180deg, ' + (exp.color || getTypeColor(exp.type)) + ', transparent)'"></div>
+      <div class="card-header-strip" [style.--strip-bg]="getStripBg(exp.type)">
+        <div class="card-company">
+          <div class="company-logo" [style.background]="(exp.color || getTypeColor(exp.type)) + '18'" [style.border-color]="(exp.color || getTypeColor(exp.type)) + '30'">
+            {{ exp.icon || '🏢' }}
+          </div>
+          {{ exp.company }}
+        </div>
+        <div class="card-date-badge" [style.--badge-color]="exp.color || getTypeColor(exp.type)" [style.--badge-bg]="(exp.color || getTypeColor(exp.type)) + '18'" [style.--badge-border]="(exp.color || getTypeColor(exp.type)) + '35'">
+          {{ formatDateForDisplay(exp.start_date) }}{{ exp.end_date ? ' – ' + formatDateForDisplay(exp.end_date) : '' }}
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-role" [style.color]="exp.color || getTypeColor(exp.type)">{{ exp.title }}</div>
+        <div class="card-type-row">
+          <span class="card-type-badge" [ngClass]="getTypeClass(exp.type)">
+            <span class="card-status-dot"></span>{{ getTypeLabel(exp.type) }}
+          </span>
+          <span class="card-current" *ngIf="exp.current === 1">
+            <span class="card-status-dot" style="animation: currentPulse 2s infinite;"></span>En cours
+          </span>
+          <span *ngIf="exp.location" style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);">📍 {{ exp.location }}</span>
+        </div>
+        <div class="card-desc" *ngIf="exp.description && exp.description.length > 0">{{ exp.description[0] }}</div>
+        <ul class="card-tasks">
+          <li *ngFor="let task of (exp.description || []).slice(0, 3)">{{ task }}</li>
+        </ul>
+        <div class="card-footer">
+          <div class="card-duration">{{ getDuration(exp.start_date, exp.end_date) }}</div>
+          <div class="card-actions">
+            <button class="btn-edit" (click)="openModal(exp)">✏️ Éditer</button>
+            <button class="btn-del" (click)="openDeleteModal(exp)">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- ══ ADD/EDIT MODAL ══ -->
+  <div class="modal-backdrop" [class.open]="isModalOpen" (click)="$event.target === modalBd && closeModal()" #modalBd>
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title">
+          <div class="modal-title-dot"></div>
+          <span>{{ editingExperience ? 'Modifier l\'entrée' : 'Nouvelle entrée' }}</span>
+        </div>
+        <button class="modal-close" (click)="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <div class="form-label">Entreprise / Établissement <span class="req">*</span></div>
+            <input class="form-input" type="text" [(ngModel)]="formData.company" placeholder="Ex: EDS Télécom">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Type <span class="req">*</span></div>
+            <select class="form-select" [(ngModel)]="formData.type">
+              <option value="work">💼 Emploi</option>
+              <option value="stage">📋 Stage</option>
+              <option value="edu">🎓 Formation</option>
+              <option value="freelance">🚀 Freelance</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <div class="form-label">Poste / Rôle <span class="req">*</span></div>
+            <input class="form-input" type="text" [(ngModel)]="formData.title" placeholder="Ex: Développeur Full-Stack">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Localisation</div>
+            <input class="form-input" type="text" [(ngModel)]="formData.location" placeholder="Ex: Le Mans, France">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Date de début <span class="req">*</span></div>
+            <input class="form-input" type="date" [(ngModel)]="formData.start_date">
+          </div>
+          <div class="form-group">
+            <div class="form-label">Date de fin</div>
+            <input class="form-input" type="date" [(ngModel)]="formData.end_date" [disabled]="formData.current_bool">
+            <div class="form-hint" *ngIf="formData.current_bool">Désactivé car "Poste actuel" est coché.</div>
+          </div>
+          <div class="form-group full">
+            <div class="form-label">Missions <span style="color:var(--muted);">(une par ligne)</span></div>
+            <textarea class="form-textarea" style="min-height:110px;" [(ngModel)]="formData.description_text"
+              placeholder="Développement d'applications web Full-Stack&#10;Maintenance et évolution des applications&#10;…"></textarea>
+            <div class="form-hint">Chaque ligne devient un élément de liste.</div>
+          </div>
+          <div class="form-group full">
+            <div class="check-row" (click)="toggleCurrent()">
+              <div class="check-box" [class.on]="formData.current_bool">{{ formData.current_bool ? '✓' : '' }}</div>
+              <div class="check-label">Afficher comme poste actuel (dot pulsant + badge "En cours")</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" (click)="closeModal()">Annuler</button>
+        <button class="btn-save-m" (click)="saveExperience()">
+          <span>{{ editingExperience ? '💾 Mettre à jour' : '💾 Enregistrer' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DELETE CONFIRM ══ -->
+  <div class="modal-backdrop" [class.open]="isDeleteModalOpen" (click)="$event.target === delBd && closeDeleteModal()" #delBd>
+    <div class="confirm-modal">
+      <div class="confirm-icon">⚠️</div>
+      <div class="confirm-title">Supprimer l'entrée ?</div>
+      <div class="confirm-text"><strong style="color:var(--text);">"{{ experienceToDelete?.company }}"</strong> sera définitivement supprimée de votre portfolio.</div>
+      <div class="confirm-actions" style="display:flex;gap:.8rem;justify-content:center;">
+        <button class="btn-cancel" (click)="closeDeleteModal()">Annuler</button>
+        <button class="btn-confirm-del" (click)="confirmDelete()">🗑 Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>

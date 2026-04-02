@@ -1,1 +1,142 @@
-<p>apropos works!</p>
+<div class="content">
+  <!-- TABS -->
+  <div class="page-tabs">
+    <button class="page-tab" [class.active]="activeTab === 'profil'" (click)="switchTab('profil')">👤 Profil</button>
+    <button class="page-tab" [class.active]="activeTab === 'interets'" (click)="switchTab('interets')">🎯 Intérêts</button>
+  </div>
+
+  <!-- TAB PROFIL -->
+  <div *ngIf="activeTab === 'profil' && about">
+    <!-- Photo Panel -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Photo de profil</div>
+        <button class="btn-save-main" (click)="saveAbout()"><span>💾 Sauvegarder</span></button>
+      </div>
+      <div class="panel-body">
+        <div class="profil-layout">
+          <div class="photo-panel">
+            <div class="photo-ring" (click)="photoInput.click()">
+              <div class="photo-inner">
+                <div *ngIf="!about.photo" class="photo-initials">KT</div>
+                <img *ngIf="about.photo" class="photo-img" [src]="getPhotoUrl(about.photo)" alt="">
+              </div>
+            </div>
+            <input #photoInput type="file" (change)="onPhotoSelected($event)" style="display: none;">
+            <div class="photo-actions">
+              <button class="photo-btn photo-btn-upload" (click)="photoInput.click()">📷 Changer</button>
+              <button class="photo-btn photo-btn-remove" (click)="removePhoto()">🗑 Supprimer</button>
+            </div>
+            <div class="photo-status"><div class="photo-status-dot"></div>Photo active · Publique</div>
+          </div>
+          <div>
+            <div class="form-grid">
+              <div class="form-group">
+                <div class="form-label">Prénom & Nom</div>
+                <input class="form-input" [(ngModel)]="about.name" type="text">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Titre professionnel</div>
+                <input class="form-input" [(ngModel)]="about.title" type="text">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Email</div>
+                <input class="form-input" [(ngModel)]="about.email" type="email">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Téléphone</div>
+                <input class="form-input" [(ngModel)]="about.phone" type="tel">
+              </div>
+              <div class="form-group">
+                <div class="form-label">Nationalité</div>
+                <input class="form-input" [(ngModel)]="about.nationality" type="text">
+              </div>
+              <div class="form-group" style="grid-column:1/-1;">
+                <div class="form-label">Adresse</div>
+                <input class="form-input" [(ngModel)]="about.location" type="text">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bio Panel -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Bio & Description</div>
+        <button class="btn-save-main" (click)="saveAbout()"><span>💾 Sauvegarder</span></button>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <div class="form-label">Bio complète</div>
+          
+          <!-- Tag Helpers -->
+          <div class="bio-tags">
+            <button *ngFor="let tag of bioTags" 
+                    type="button" 
+                    class="bio-tag-btn" 
+                    (click)="insertTag(tag.snippet, bioTextarea)">
+              {{ tag.label }}
+            </button>
+          </div>
+
+          <textarea #bioTextarea class="form-textarea" [(ngModel)]="about.bio" style="min-height:130px;"></textarea>
+        </div>
+        <div class="preview-label">Aperçu</div>
+        <div class="preview-card"><div [innerHTML]="about.bio"></div></div>
+      </div>
+    </div>
+
+    <!-- Social Links Panel -->
+    <div class="panel" *ngIf="about.social_links">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Liens & Réseaux</div>
+        <button class="btn-save-main" (click)="saveAbout()"><span>💾 Sauvegarder</span></button>
+      </div>
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <div class="form-label">🔗 GitHub</div>
+            <input class="form-input" [(ngModel)]="about.social_links.github" type="url">
+          </div>
+          <div class="form-group">
+            <div class="form-label">💼 LinkedIn</div>
+            <input class="form-input" [(ngModel)]="about.social_links.linkedin" type="url">
+          </div>
+          <div class="form-group">
+            <div class="form-label">🐦 Twitter / X</div>
+            <input class="form-input" [(ngModel)]="about.social_links.twitter" type="url">
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <div class="form-label">📄 CV (URL)</div>
+            <input class="form-input" [(ngModel)]="about.resume_url" type="url">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB INTERETS -->
+  <div *ngIf="activeTab === 'interets' && about">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><div class="panel-dot"></div>Centres d'intérêt</div>
+        <button class="btn-save-main" (click)="saveAbout()"><span>💾 Sauvegarder</span></button>
+      </div>
+      <div class="panel-body">
+        <div class="interests-grid">
+          <div class="interest-card" *ngFor="let interest of about.interests" 
+               [class.selected]="true" (click)="toggleInterest(interest)">
+            <div class="interest-check">✓</div>
+            <div class="interest-name">{{ interest }}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:1rem;margin-top:1.4rem;">
+          <input class="form-input" #newInterest type="text" placeholder="Ajouter un intérêt…">
+          <button class="btn-save-main" (click)="addCustomInterest(newInterest)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

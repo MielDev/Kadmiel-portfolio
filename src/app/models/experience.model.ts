@@ -8,4 +8,7 @@ export interface Experience {
   description: string[];
   current: number;
   created_at: string;
+  type?: string;
+  icon?: string;
+  color?: string;
 }

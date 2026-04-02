@@ -7,10 +7,10 @@
     <i class="ri-search-line" style="color:var(--muted);font-size:.8rem;"></i>
     <input placeholder="Rechercher…" type="text">
   </div>
-  <div class="topbar-btn">
+  <a routerLink="/admin/messages" class="topbar-btn">
     <i class="ri-notification-3-line"></i>
-    <div class="notif-dot"></div>
-  </div>
+    <div class="notif-dot" *ngIf="(unreadCount$ | async) as count"></div>
+  </a>
   <div class="topbar-btn"><i class="ri-flashlight-line"></i></div>
   <div class="topbar-time">{{ currentTime }}</div>
 </div>

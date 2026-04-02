@@ -19,26 +19,32 @@ export class ProjectService {
     );
   }
 
-  getProject(id: string): Observable<Project> {
+  getProject(id: number): Observable<Project> {
     return this.http.get<ApiResponse<Project>>(`${this.apiUrl}/${id}`).pipe(
       map(response => response.data)
     );
   }
 
-  createProject(project: Project): Observable<Project> {
+  createProject(project: FormData): Observable<Project> {
     return this.http.post<ApiResponse<Project>>(this.apiUrl, project).pipe(
       map(response => response.data)
     );
   }
 
-  updateProject(id: string, project: Project): Observable<Project> {
+  updateProject(id: number, project: FormData): Observable<Project> {
     return this.http.put<ApiResponse<Project>>(`${this.apiUrl}/${id}`, project).pipe(
       map(response => response.data)
     );
   }
 
-  deleteProject(id: string): Observable<void> {
+  deleteProject(id: number): Observable<void> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`).pipe(
+      map(() => undefined)
+    );
+  }
+
+  incrementViewCount(id: number): Observable<void> {
+    return this.http.post<ApiResponse<void>>(`${this.apiUrl}/${id}/view`, {}).pipe(
       map(() => undefined)
     );
   }

@@ -63,4 +63,12 @@ export class AboutService {
       map(response => response.data)
     );
   }
+
+  uploadPhoto(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('photo', file);
+    return this.http.post<ApiResponse<{ photo: string }>>(`${this.apiUrl}/upload-photo`, formData).pipe(
+      map(response => response.data.photo)
+    );
+  }
 }

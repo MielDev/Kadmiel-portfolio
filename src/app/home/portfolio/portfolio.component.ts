@@ -13,6 +13,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { Title, Meta } from '@angular/platform-browser';
 import { ProjectService } from '../../services/project.service';
 import { SkillService } from '../../services/skill.service';
 import { ExperienceService } from '../../services/experience.service';
@@ -24,6 +25,7 @@ import { MessageService } from '../../services/message.service';
 import { TechnicalLevelService } from '../../services/technical-level.service';
 import { AvailabilityService, Availability } from '../../services/availability.service';
 import { AnalyticsService } from '../../services/analytics.service';
+import { SettingsService } from '../../services/settings.service';
 import { Project } from '../../models/project.model';
 import { Skill } from '../../models/skill.model';
 import { Experience } from '../../models/experience.model';
@@ -31,6 +33,7 @@ import { Testimonial } from '../../models/testimonial.model';
 import { Blog } from '../../models/blog.model';
 import { TechnicalLevel } from '../../models/technical-level.model';
 import { HeroData } from '../../models/hero.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-portfolio',
@@ -57,6 +60,40 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   aboutData: About | null = null;
   heroData: HeroData | null = null;
   availabilityData: Availability | null = null;
+  currentYear = new Date().getFullYear();
+  settings: any = {
+    display: {
+      customCursor: true,
+      bgGrid: true,
+      animations: true,
+      floatingCv: true
+    },
+    branding: {
+      logoType: 'text',
+      logoText: 'KT.',
+      fullName: 'Kadmiel TOGNON',
+      footerRights: 'Tous droits réservés.',
+      location: 'Le Mans, France'
+    },
+    hero: {},
+    colors: {
+      bg: '#070B14',
+      primary: '#FF3B3B',
+      secondary: '#7C3AED',
+      text: '#FFFFFF'
+    },
+    typography: {
+      titleFont: 'orbitron',
+      bodyFont: 'syne'
+    },
+    social: {
+      linkedin: '',
+      github: '',
+      twitter: '',
+      instagram: '',
+      whatsapp: ''
+    }
+  };
 
   // Contact Form
   contact = {
@@ -72,6 +109,8 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private el: ElementRef, 
     private renderer: Renderer2,
+    private titleService: Title,
+    private metaService: Meta,
     private projectService: ProjectService,
     private skillService: SkillService,
     private experienceService: ExperienceService,
@@ -83,12 +122,85 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     private technicalLevelService: TechnicalLevelService,
     private availabilityService: AvailabilityService,
     private analyticsService: AnalyticsService,
+    private settingsService: SettingsService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadData();
+    this.loadSettings();
     this.analyticsService.track('pageview').subscribe();
+  }
+
+  private loadSettings(): void {
+    this.settingsService.getAllSettings().subscribe({
+      next: (data: any) => {
+        // Merge with defaults to ensure all fields exist
+        this.settings = {
+          ...this.settings,
+          ...data,
+          display: { ...this.settings['display'], ...(data?.['display'] || {}) },
+          branding: { ...this.settings['branding'], ...(data?.['branding'] || {}) },
+          hero: { ...this.settings['hero'], ...(data?.['hero'] || {}) },
+          colors: { ...this.settings['colors'], ...(data?.['colors'] || {}) },
+          typography: { ...this.settings['typography'], ...(data?.['typography'] || {}) },
+          seo: { ...(data?.['seo'] || {}) },
+          social: { ...this.settings['social'], ...(data?.['social'] || {}) }
+        };
+        this.applySettings();
+      },
+      error: (err) => {
+        console.error('Error loading settings:', err);
+        this.applySettings();
+      }
+    });
+  }
+
+  private applySettings(): void {
+    if (!this.settings) return;
+
+    // Apply SEO
+    const seo = this.settings['seo'];
+    if (seo) {
+      if (seo.title) this.titleService.setTitle(seo.title);
+      if (seo.description) {
+        this.metaService.updateTag({ name: 'description', content: seo.description });
+        this.metaService.updateTag({ property: 'og:description', content: seo.description });
+      }
+      if (seo.keywords) this.metaService.updateTag({ name: 'keywords', content: seo.keywords });
+      if (seo.ogTitle) this.metaService.updateTag({ property: 'og:title', content: seo.ogTitle });
+      if (seo.url) this.metaService.updateTag({ property: 'og:url', content: seo.url });
+    }
+
+    // Apply Colors
+    const colors = this.settings['colors'];
+    if (colors) {
+      const root = document.documentElement;
+      if (colors.bg) root.style.setProperty('--bg', colors.bg);
+      if (colors.primary) root.style.setProperty('--red', colors.primary);
+      if (colors.secondary) root.style.setProperty('--violet', colors.secondary);
+      if (colors.text) root.style.setProperty('--text', colors.text);
+    }
+
+    // Apply Fonts
+    const typography = this.settings['typography'];
+    if (typography) {
+      const root = document.documentElement;
+      if (typography.titleFont) {
+        const font = typography.titleFont === 'orbitron' ? "'Orbitron', sans-serif" : 
+                    typography.titleFont === 'space' ? "'Space Mono', monospace" :
+                    typography.titleFont === 'rajdhani' ? "'Rajdhani', sans-serif" : 
+                    "'Orbitron', sans-serif";
+        root.style.setProperty('--font-title', font);
+      }
+      if (typography.bodyFont) {
+        const font = typography.bodyFont === 'syne' ? "'Syne', sans-serif" : 
+                    typography.bodyFont === 'inter' ? "'Inter', sans-serif" :
+                    typography.bodyFont === 'manrope' ? "'Manrope', sans-serif" : 
+                    "'Syne', sans-serif";
+        root.style.setProperty('--font-body', font);
+      }
+    }
   }
 
   ngAfterViewInit(): void {
@@ -139,6 +251,31 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
       this.availabilityData = data;
       this.refreshReveals();
     });
+  }
+
+  /* ─── UTILS ─── */
+  getPhotoUrl(image: string | null | undefined): string {
+    if (!image) return '';
+    if (image.startsWith('http')) return image;
+    const baseUrl = environment.apiUrl.replace('/api', '');
+    if (image.includes('uploads/')) {
+      return `${baseUrl}${image.startsWith('/') ? '' : '/'}${image}`;
+    }
+    return `${baseUrl}/uploads/${image}`;
+  }
+
+  getAboutPhotoUrl(image: string | null | undefined): string {
+    return this.getPhotoUrl(image);
+  }
+
+  getImageUrl(image: string | null | undefined): string {
+    if (!image) return 'assets/placeholder-project.jpg';
+    return this.getPhotoUrl(image);
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '??';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
   }
 
   getPrimaryCtaHref(): string {
@@ -216,11 +353,18 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   private initCursor(): void {
     const cursor = this.el.nativeElement.querySelector('#cursor');
     const trail = this.el.nativeElement.querySelector('#cursorTrail');
+    
+    // Safety check: if elements are not in DOM, don't proceed
+    if (!cursor || !trail) {
+      console.warn('Cursor elements not found in DOM. Skipping initCursor.');
+      return;
+    }
+
     const isTouchDevice = () => window.matchMedia('(hover: none)').matches;
 
     if (isTouchDevice()) {
-      if (cursor) this.renderer.setStyle(cursor, 'display', 'none');
-      if (trail) this.renderer.setStyle(trail, 'display', 'none');
+      this.renderer.setStyle(cursor, 'display', 'none');
+      this.renderer.setStyle(trail, 'display', 'none');
       this.renderer.setStyle(document.body, 'cursor', 'auto');
       this.el.nativeElement.querySelectorAll('*').forEach((el: HTMLElement) => this.renderer.setStyle(el, 'cursor', ''));
     } else {
@@ -229,18 +373,14 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
 
       const mouseMoveListener = this.renderer.listen('document', 'mousemove', (e: MouseEvent) => {
         mx = e.clientX; my = e.clientY;
-        if (cursor) {
-          this.renderer.setStyle(cursor, 'transform', `translate(${mx - 6}px, ${my - 6}px) scale(${isHover ? 1.8 : 1})`);
-        }
+        this.renderer.setStyle(cursor, 'transform', `translate(${mx - 6}px, ${my - 6}px) scale(${isHover ? 1.8 : 1})`);
       });
       this.unlisteners.push(mouseMoveListener);
 
       const animTrail = () => {
         tx += (mx - tx) * 0.12;
         ty += (my - ty) * 0.12;
-        if (trail) {
-          this.renderer.setStyle(trail, 'transform', `translate(${tx - 16}px, ${ty - 16}px)`);
-        }
+        this.renderer.setStyle(trail, 'transform', `translate(${tx - 16}px, ${ty - 16}px)`);
         this.animTrailId = requestAnimationFrame(animTrail);
       };
       animTrail();
@@ -248,21 +388,17 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
       this.el.nativeElement.querySelectorAll('a, button, .btn, .skill-card, .project-card, .contact-item').forEach((el: HTMLElement) => {
         const mouseEnterListener = this.renderer.listen(el, 'mouseenter', () => {
           isHover = true;
-          if (cursor) this.renderer.setStyle(cursor, 'transform', `translate(${mx - 6}px, ${my - 6}px) scale(1.8)`);
-          if (trail) {
-            this.renderer.setStyle(trail, 'width', '48px');
-            this.renderer.setStyle(trail, 'height', '48px');
-            this.renderer.setStyle(trail, 'borderColor', 'var(--accent-red)');
-          }
+          this.renderer.setStyle(cursor, 'transform', `translate(${mx - 6}px, ${my - 6}px) scale(1.8)`);
+          this.renderer.setStyle(trail, 'width', '48px');
+          this.renderer.setStyle(trail, 'height', '48px');
+          this.renderer.setStyle(trail, 'borderColor', 'var(--red)');
         });
         const mouseLeaveListener = this.renderer.listen(el, 'mouseleave', () => {
           isHover = false;
-          if (cursor) this.renderer.setStyle(cursor, 'transform', `translate(${mx - 6}px, ${my - 6}px) scale(1)`);
-          if (trail) {
-            this.renderer.setStyle(trail, 'width', '32px');
-            this.renderer.setStyle(trail, 'height', '32px');
-            this.renderer.setStyle(trail, 'borderColor', 'var(--accent-violet)');
-          }
+          this.renderer.setStyle(cursor, 'transform', `translate(${mx - 6}px, ${my - 6}px) scale(1)`);
+          this.renderer.setStyle(trail, 'width', '32px');
+          this.renderer.setStyle(trail, 'height', '32px');
+          this.renderer.setStyle(trail, 'borderColor', 'rgba(255,255,255,0.15)');
         });
         this.unlisteners.push(mouseEnterListener, mouseLeaveListener);
       });
@@ -390,5 +526,19 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private initNavActiveLinkHighlight(): void {
     this.updateNavActiveLink();
+  }
+
+  incrementViewCount(id: number): void {
+    this.projectService.incrementViewCount(id).subscribe({
+      next: () => {
+        const project = this.projects.find(p => p.id === id);
+        if (project) {
+          project.views = (project.views || 0) + 1;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to increment view count', err);
+      }
+    });
   }
 }

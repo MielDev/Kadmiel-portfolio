@@ -16,7 +16,7 @@
   </a>
   <a routerLink="/admin/messages" routerLinkActive="active" class="nav-item">
     <span class="nav-icon"><i class="ri-mail-line"></i></span> Messages
-    <span class="nav-badge">4</span>
+    <span class="nav-badge" *ngIf="(unreadCount$ | async) as count">{{ count }}</span>
   </a>
   <a routerLink="/admin/blog" routerLinkActive="active" class="nav-item">
     <span class="nav-icon"><i class="ri-edit-box-line"></i></span> Blog
@@ -34,6 +34,12 @@
   </a>
   <a routerLink="/admin/competences" routerLinkActive="active" class="nav-item">
     <span class="nav-icon"><i class="ri-tools-line"></i></span> Compétences
+  </a>
+  <a routerLink="/admin/niveaux-tech" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-bar-chart-box-line"></i></span> Niveau technologie
+  </a>
+  <a routerLink="/admin/experiences" routerLinkActive="active" class="nav-item">
+    <span class="nav-icon"><i class="ri-briefcase-line"></i></span> Expériences
   </a>
 
   <div class="nav-section-label" style="margin-top:.8rem;">Système</div>
