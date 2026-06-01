@@ -1,0 +1,8 @@
+div :first-of-type {
+	background-color: purple;
+}
+
+div div {
+	background-color: yellow;
+	width: 100px;
+}
