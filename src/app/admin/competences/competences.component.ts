@@ -30,7 +30,7 @@ export class CompetencesComponent implements OnInit {
     id: 0,
     title: '',
     description: '',
-    icon: '⚡',
+    icon: 'fa-solid fa-bolt',
     technologies: [],
     category: 'Frontend'
   };
@@ -122,7 +122,7 @@ export class CompetencesComponent implements OnInit {
       id: 0,
       title: '',
       description: '',
-      icon: '⚡',
+      icon: 'fa-solid fa-bolt',
       technologies: [],
       category: 'Frontend'
     };

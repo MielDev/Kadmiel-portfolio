@@ -21,7 +21,6 @@ export interface Availability {
 export interface AvailabilityTag {
   text: string;
   icon?: string | null;
-  emoji?: string | null;
 }
 
 @Injectable({
@@ -86,17 +85,16 @@ export class AvailabilityService {
       const v = value as Record<string, unknown>;
 
       const iconRaw = this.pickFirstString(v, ['icon', 'icon_class', 'iconClass', 'class', 'className']);
-      const emojiRaw = this.pickFirstString(v, ['emoji']);
+      const legacyMarkerIcon = this.pickFirstString(v, ['emoji']) ? 'fa-solid fa-tag' : null;
       const textRaw = this.pickFirstString(v, ['text', 'label', 'name', 'title', 'value', 'tag']);
 
-      const icon = iconRaw?.trim() || null;
-      const emoji = emojiRaw?.trim() || null;
+      const icon = iconRaw?.trim() || legacyMarkerIcon;
       const text = textRaw?.trim() || null;
 
-      if (text) return { text, icon, emoji };
+      if (text) return { text, icon };
 
       const fallbackText = Object.values(v).find(x => typeof x === 'string' && x.trim());
-      if (typeof fallbackText === 'string') return { text: fallbackText.trim(), icon, emoji };
+      if (typeof fallbackText === 'string') return { text: fallbackText.trim(), icon };
     }
 
     return null;

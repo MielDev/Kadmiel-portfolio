@@ -56,10 +56,11 @@ export class TestimonialService {
     );
   }
 
-  uploadPhoto(file: File): Observable<string> {
+  uploadPhoto(file: File, token?: string): Observable<string> {
     const formData = new FormData();
     formData.append('photo', file);
-    return this.http.post<ApiResponse<{ photo: string }>>(`${this.apiUrl}/upload-photo`, formData).pipe(
+    const url = token ? `${this.apiUrl}/upload-photo/${token}` : `${this.apiUrl}/upload-photo`;
+    return this.http.post<ApiResponse<{ photo: string }>>(url, formData).pipe(
       map(response => response.data.photo)
     );
   }

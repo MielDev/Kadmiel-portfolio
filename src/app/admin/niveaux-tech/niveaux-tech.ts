@@ -210,7 +210,7 @@ export class NiveauxTech implements OnInit, OnDestroy {
   }
 
   // UI Helpers (Called less frequently or for static values)
-  catEmoji(cat: string) {
+  catIcon(cat: string) {
     const map: any = { 'hard': 'fa-solid fa-bolt', 'soft': 'fa-solid fa-brain' };
     return map[cat] || 'fa-solid fa-star';
   }

@@ -157,14 +157,7 @@ export class TemoignagesComponent implements OnInit {
   }
 
   copyPublicLink(): void {
-    const baseUrl = window.location.origin;
-    const publicLink = `${baseUrl}/testimonial/new`;
-    
-    navigator.clipboard.writeText(publicLink).then(() => {
-      alert('Lien de récolte public copié !');
-    }).catch(err => {
-      console.error('Erreur lors de la copie du lien', err);
-    });
+    this.generateUniqueLink();
   }
 
   generateUniqueLink(): void {

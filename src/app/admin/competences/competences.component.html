@@ -3,7 +3,7 @@
 
     <!-- INFO BANNER -->
     <div class="info-banner">
-      <div class="info-banner-icon">🎯</div>
+      <div class="info-banner-icon"><i class="fa-solid fa-bullseye"></i></div>
       <div class="info-banner-text">
         <div class="info-banner-title">Section "Mon arsenal tech" du portfolio</div>
         <div class="info-banner-desc">Ces cards s'affichent dans la section Compétences de ton portfolio public — icône + titre + description + tags technologies.</div>
@@ -14,18 +14,18 @@
     <div class="toolbar">
       <div class="toolbar-left">
         <div class="search-box">
-          <span style="color:var(--muted);font-size:.9rem;">🔍</span>
+          <span style="color:var(--muted);font-size:.9rem;"><i class="fa-solid fa-magnifying-glass"></i></span>
           <input [(ngModel)]="searchTerm" (input)="onSearch()" type="text" placeholder="Rechercher une compétence…">
         </div>
         <button class="filter-btn" [class.active]="currentFilter === 'all'" (click)="setFilter('all')">Toutes</button>
-        <button class="filter-btn" [class.active]="currentFilter === 'Frontend'" (click)="setFilter('Frontend')">⚡ Frontend</button>
-        <button class="filter-btn" [class.active]="currentFilter === 'Backend'" (click)="setFilter('Backend')">🔧 Backend</button>
-        <button class="filter-btn" [class.active]="currentFilter === 'DevOps'" (click)="setFilter('DevOps')">🐳 DevOps</button>
-        <button class="filter-btn" [class.active]="currentFilter === 'Mobile'" (click)="setFilter('Mobile')">📱 Mobile</button>
-        <button class="filter-btn" [class.active]="currentFilter === 'Design'" (click)="setFilter('Design')">🎨 Design</button>
-        <button class="filter-btn" [class.active]="currentFilter === 'Gestion'" (click)="setFilter('Gestion')">📊 Gestion</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Frontend'" (click)="setFilter('Frontend')"><i class="fa-solid fa-bolt"></i> Frontend</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Backend'" (click)="setFilter('Backend')"><i class="fa-solid fa-server"></i> Backend</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'DevOps'" (click)="setFilter('DevOps')"><i class="fa-brands fa-docker"></i> DevOps</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Mobile'" (click)="setFilter('Mobile')"><i class="fa-solid fa-mobile-screen-button"></i> Mobile</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Design'" (click)="setFilter('Design')"><i class="fa-solid fa-palette"></i> Design</button>
+        <button class="filter-btn" [class.active]="currentFilter === 'Gestion'" (click)="setFilter('Gestion')"><i class="fa-solid fa-chart-simple"></i> Gestion</button>
       </div>
-      <button class="btn-add" (click)="openAddModal()"><span>✦ Ajouter une carte</span></button>
+      <button class="btn-add" (click)="openAddModal()"><span><i class="fa-solid fa-plus"></i> Ajouter une carte</span></button>
     </div>
 
     <!-- SKILLS GRID -->
@@ -49,8 +49,8 @@
           </div>
           <div class="card-footer">
             <div class="card-actions">
-              <button class="btn-act btn-edit" (click)="openEditModal(skill)">✏️ Éditer</button>
-              <button class="btn-act btn-del" (click)="openDeleteModal(skill)">🗑</button>
+              <button class="btn-act btn-edit" (click)="openEditModal(skill)"><i class="fa-solid fa-pen"></i> Éditer</button>
+              <button class="btn-act btn-del" (click)="openDeleteModal(skill)"><i class="fa-solid fa-trash"></i></button>
             </div>
           </div>
         </div>
@@ -58,10 +58,10 @@
     </div>
 
     <div class="empty-state" *ngIf="filteredSkills.length === 0">
-      <div class="empty-icon">🛠️</div>
+      <div class="empty-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
       <div class="empty-title">Aucune carte trouvée</div>
       <div class="empty-desc">Modifiez votre recherche ou ajoutez une nouvelle carte.</div>
-      <button class="btn-add" style="margin:0 auto;" (click)="openAddModal()"><span>✦ Ajouter</span></button>
+      <button class="btn-add" style="margin:0 auto;" (click)="openAddModal()"><span><i class="fa-solid fa-plus"></i> Ajouter</span></button>
     </div>
 
   </div>
@@ -75,7 +75,7 @@
         <span *ngIf="!isEditing">Nouvelle carte</span>
         <span *ngIf="isEditing">Modifier la carte</span>
       </div>
-      <button class="modal-close" (click)="closeModal()">✕</button>
+      <button class="modal-close" (click)="closeModal()"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <div class="form-row">
@@ -127,8 +127,8 @@
     <div class="modal-foot">
       <button class="btn-cancel" (click)="closeModal()">Annuler</button>
       <button class="btn-save" (click)="saveSkill()">
-        <span *ngIf="!isEditing">💾 Enregistrer</span>
-        <span *ngIf="isEditing">💾 Mettre à jour</span>
+        <span *ngIf="!isEditing"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</span>
+        <span *ngIf="isEditing"><i class="fa-solid fa-floppy-disk"></i> Mettre à jour</span>
       </button>
     </div>
   </div>
@@ -137,12 +137,12 @@
 <!-- DELETE CONFIRM -->
 <div class="modal-backdrop" *ngIf="showDeleteModal" (click)="$event.target === $event.currentTarget && closeDeleteModal()">
   <div class="confirm-modal">
-    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
     <div class="confirm-title">Supprimer la carte ?</div>
     <div class="confirm-text"><strong>"{{ deleteName }}"</strong> sera retirée de ton portfolio.</div>
     <div class="confirm-actions">
       <button class="btn-cancel" (click)="closeDeleteModal()">Annuler</button>
-      <button class="btn-confirm-del" (click)="confirmDelete()">🗑 Supprimer</button>
+      <button class="btn-confirm-del" (click)="confirmDelete()"><i class="fa-solid fa-trash"></i> Supprimer</button>
     </div>
   </div>
 </div>

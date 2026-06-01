@@ -169,41 +169,41 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     const cleanTrend = (t: string) => t ? t.replace('+', '').replace('-', '') : '0.0%';
 
     this.kpiStats = [
-      { 
-        label: 'Visiteurs uniques', 
-        value: this.animatedValues['visitors'], 
-        trend: cleanTrend(this.overview.uniqueVisitorsTrend), 
-        trendUp: this.overview.uniqueVisitorsTrendUp !== false, 
-        icon: '👁', 
-        color: '#38BDF8', 
-        sparkId: 'spark1' 
+      {
+        label: 'Visiteurs uniques',
+        value: this.animatedValues['visitors'],
+        trend: cleanTrend(this.overview.uniqueVisitorsTrend),
+        trendUp: this.overview.uniqueVisitorsTrendUp !== false,
+        icon: 'fa-solid fa-eye',
+        color: '#38BDF8',
+        sparkId: 'spark1'
       },
-      { 
-        label: 'Pages vues', 
-        value: this.animatedValues['views'], 
-        trend: cleanTrend(this.overview.totalViewsTrend), 
-        trendUp: this.overview.totalViewsTrendUp !== false, 
-        icon: '📄', 
-        color: '#FF3B3B', 
-        sparkId: 'spark2' 
+      {
+        label: 'Pages vues',
+        value: this.animatedValues['views'],
+        trend: cleanTrend(this.overview.totalViewsTrend),
+        trendUp: this.overview.totalViewsTrendUp !== false,
+        icon: 'fa-solid fa-file-lines',
+        color: '#FF3B3B',
+        sparkId: 'spark2'
       },
-      { 
-        label: 'Durée moy. session', 
-        value: durationStr, 
-        trend: cleanTrend(this.overview.avgSessionDurationTrend), 
-        trendUp: this.overview.avgSessionDurationTrendUp !== false, 
-        icon: '⏱', 
-        color: '#7C3AED', 
-        sparkId: 'spark3' 
+      {
+        label: 'Durée moy. session',
+        value: durationStr,
+        trend: cleanTrend(this.overview.avgSessionDurationTrend),
+        trendUp: this.overview.avgSessionDurationTrendUp !== false,
+        icon: 'fa-solid fa-clock',
+        color: '#7C3AED',
+        sparkId: 'spark3'
       },
-      { 
-        label: 'Taux de rebond', 
-        value: this.animatedValues['bounce'] + '%', 
-        trend: cleanTrend(this.overview.bounceRateTrend), 
+      {
+        label: 'Taux de rebond',
+        value: this.animatedValues['bounce'] + '%',
+        trend: cleanTrend(this.overview.bounceRateTrend),
         trendUp: this.overview.bounceRateTrendUp === false, // Une baisse (false) est bonne pour le rebond
-        icon: '📉', 
-        color: '#FBBF24', 
-        sparkId: 'spark4' 
+        icon: 'fa-solid fa-chart-line',
+        color: '#FBBF24',
+        sparkId: 'spark4'
       }
     ];
   }
@@ -255,7 +255,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.geoStats = this.countries.slice(0, 5).map(c => {
       const countryCode = this.getCountryCode(c.country);
       return {
-        flag: this.getFlagEmoji(c.country),
+        flag: this.getFlagIcon(c.country),
         flagUrl: countryCode ? `https://flagcdn.com/w40/${countryCode.toLowerCase()}.png` : null,
         name: c.country || 'Inconnu',
         pct: total > 0 ? Math.round((c.count / total) * 100) : 0,
@@ -266,9 +266,9 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private processDeviceAndBrowserStats(devices: any[] = [], browsers: any[] = []): void {
     const deviceMap: any = {
-      'desktop': { icon: '💻', name: 'Desktop', color: 'linear-gradient(90deg,#7C3AED,#FF3B3B)' },
-      'mobile': { icon: '📱', name: 'Mobile', color: 'linear-gradient(90deg,#38BDF8,#7C3AED)' },
-      'tablet': { icon: '📟', name: 'Tablette', color: 'linear-gradient(90deg,#FBBF24,#FB923C)' }
+      'desktop': { icon: 'fa-solid fa-desktop', name: 'Desktop', color: 'linear-gradient(90deg,#7C3AED,#FF3B3B)' },
+      'mobile': { icon: 'fa-solid fa-mobile-screen-button', name: 'Mobile', color: 'linear-gradient(90deg,#38BDF8,#7C3AED)' },
+      'tablet': { icon: 'fa-solid fa-tablet-screen-button', name: 'Tablette', color: 'linear-gradient(90deg,#FBBF24,#FB923C)' }
     };
 
     const totalDevices = devices.reduce((acc, d) => acc + d.count, 0);
@@ -282,17 +282,17 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     const browserIcons: any = {
-      'Chrome': '🌐',
-      'Firefox': '🦊',
-      'Safari': '🧭',
-      'Edge': '🟦',
-      'Opera': '🅾️',
-      'Autre': '❓'
+      'Chrome': 'fa-brands fa-chrome',
+      'Firefox': 'fa-brands fa-firefox-browser',
+      'Safari': 'fa-brands fa-safari',
+      'Edge': 'fa-brands fa-edge',
+      'Opera': 'fa-brands fa-opera',
+      'Autre': 'fa-solid fa-globe'
     };
 
     const totalBrowsers = browsers.reduce((acc, b) => acc + b.count, 0);
     this.browserStats = browsers.map(b => ({
-      icon: browserIcons[b.browser] || '🌐',
+      icon: browserIcons[b.browser] || 'fa-solid fa-globe',
       name: b.browser,
       pct: totalBrowsers > 0 ? Math.round((b.count / totalBrowsers) * 100) : 0
     }));
@@ -315,18 +315,18 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     const eventIcons: any = {
-      'pageview': '👁',
-      'click': '🖱',
-      'contact_submit': '✉️',
-      'contact_success': '✅',
-      'contact_error': '❌'
+      'pageview': 'fa-solid fa-eye',
+      'click': 'fa-solid fa-computer-mouse',
+      'contact_submit': 'fa-solid fa-envelope',
+      'contact_success': 'fa-solid fa-circle-check',
+      'contact_error': 'fa-solid fa-circle-xmark'
     };
 
     this.events = events.map(e => ({
-      icon: eventIcons[e.event_type] || '⚡',
+      icon: eventIcons[e.event_type] || 'fa-solid fa-bolt',
       text: this.formatEventText(e),
       time: this.formatTimeAgo(e.visited_at),
-      flag: this.getFlagEmoji(e.country)
+      flag: 'fa-solid fa-globe'
     }));
     
     // Simple realtime estimation: count unique IPs in last 5 minutes
@@ -353,8 +353,7 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private formatEventText(e: any): string {
-    const flag = this.getFlagEmoji(e.country);
-    const countryStr = e.country ? ` (${flag} ${e.country})` : '';
+    const countryStr = e.country ? ` (${e.country})` : '';
     
     switch(e.event_type) {
       case 'pageview': return `Vue de la page ${e.path}${countryStr}`;
@@ -402,13 +401,8 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     return nameToCode[code] || (code.length === 2 ? code : null);
   }
 
-  private getFlagEmoji(country: string): string {
-    if (!country) return '🌍';
-    if (/\p{Emoji}/u.test(country)) return country;
-    const finalCode = this.getCountryCode(country);
-    if (!finalCode) return '🌍';
-    const codePoints = finalCode.split('').map(char => 127397 + char.charCodeAt(0));
-    return String.fromCodePoint(...codePoints);
+  private getFlagIcon(country: string): string {
+    return 'fa-solid fa-globe';
   }
 
   // Donut helpers

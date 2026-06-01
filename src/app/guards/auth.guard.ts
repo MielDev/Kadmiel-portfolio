@@ -9,5 +9,9 @@ export const AuthGuard: CanActivateFn = (route, state) => {
 
   if (authService.isAuthenticated()) return true;
 
-  return router.createUrlTree(['/admin/login']);
+  // Redirige vers la page de connexion en gardant l'URL demandée
+  // pour pouvoir y revenir automatiquement après le login.
+  return router.createUrlTree(['/admin/login'], {
+    queryParams: { returnUrl: state.url },
+  });
 };

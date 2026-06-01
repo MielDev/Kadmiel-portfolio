@@ -1,8 +1,11 @@
 <div class="sidebar-logo">
-  <div class="sidebar-logo-mark">KT</div>
+  <div class="sidebar-logo-mark">
+    <img *ngIf="getSidebarImage()" [src]="getBrandingAssetUrl(getSidebarImage())" alt="">
+    <span *ngIf="!getSidebarImage()">{{ branding.logoText || 'KT' }}</span>
+  </div>
   <div class="sidebar-logo-text">
-    <div class="sidebar-logo-title">BACK-OFFICE</div>
-    <div class="sidebar-logo-sub">PORTFOLIO v2.1</div>
+    <div class="sidebar-logo-title">{{ branding.logoText || 'BACK-OFFICE' }}</div>
+    <div class="sidebar-logo-sub">{{ branding.logoSub || 'PORTFOLIO v2.2' }}</div>
   </div>
 </div>
 
@@ -53,7 +56,10 @@
 
 <div class="sidebar-footer">
   <div class="user-card">
-    <div class="user-avatar">KT</div>
+    <div class="user-avatar">
+      <img *ngIf="getSidebarImage()" [src]="getBrandingAssetUrl(getSidebarImage())" alt="">
+      <span *ngIf="!getSidebarImage()">{{ branding.logoText || 'KT' }}</span>
+    </div>
     <div>
       <div class="user-name">Kadmiel</div>
       <div class="user-role">ADMIN · FULL ACCESS</div>

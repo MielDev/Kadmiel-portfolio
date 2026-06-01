@@ -119,7 +119,7 @@
       <!-- Extras -->
       <div class="extras">
         <label class="remember" (click)="toggleRemember()" (mouseenter)="onMouseEnterElement()" (mouseleave)="onMouseLeaveElement()">
-          <div class="check-box" [class.checked]="remembered"></div>
+          <div class="check-box" [class.checked]="remembered"><i class="ri-check-line"></i></div>
           <span class="remember-label">Se souvenir</span>
         </label>
         <a routerLink="/" class="forgot" (mouseenter)="onMouseEnterElement()" (mouseleave)="onMouseLeaveElement()">
@@ -156,6 +156,7 @@
 
     <!-- Back link -->
     <a routerLink="/" class="back-link" style="margin-top:1rem;display:flex;" (mouseenter)="onMouseEnterElement()" (mouseleave)="onMouseLeaveElement()">
+      <i class="ri-arrow-left-line"></i>
       Retour au portfolio
     </a>
 

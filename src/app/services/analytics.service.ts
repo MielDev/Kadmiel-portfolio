@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of, BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -40,6 +41,11 @@ export interface TrackPayload {
   retargeting_eligible: boolean;
 }
 
+/**
+ * SSR-safe: every browser API (localStorage, window, document, navigator, crypto)
+ * is guarded by `isPlatformBrowser`. On the server, `track()` is a no-op so the
+ * prerender step doesn't crash and doesn't pollute analytics with bot hits.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -57,13 +63,18 @@ export class AnalyticsService {
   private readonly topPagesUrl = `${environment.apiUrl}/analytics/top-pages`;
   private readonly eventsUrl = `${environment.apiUrl}/analytics/recent-events`;
 
-  private lastTrackedEvent: { type: string, path: string, time: number } | null = null;
-  private consentSubject = new BehaviorSubject<boolean | null>(this.getInitialConsent());
+  private lastTrackedEvent: { type: string; path: string; time: number } | null = null;
+  private consentSubject: BehaviorSubject<boolean | null>;
   private viewedSections: Set<string> = new Set();
+  private readonly isBrowser: boolean;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, @Inject(PLATFORM_ID) platformId: Object) {
+    this.isBrowser = isPlatformBrowser(platformId);
+    this.consentSubject = new BehaviorSubject<boolean | null>(this.getInitialConsent());
+  }
 
   private getInitialConsent(): boolean | null {
+    if (!this.isBrowser) return null;
     const v = localStorage.getItem(this.storageKey);
     if (v === 'true') return true;
     if (v === 'false') return false;
@@ -79,11 +90,14 @@ export class AnalyticsService {
   }
 
   setConsent(consent: boolean): void {
-    localStorage.setItem(this.storageKey, String(consent));
+    if (this.isBrowser) localStorage.setItem(this.storageKey, String(consent));
     this.consentSubject.next(consent);
   }
 
   track(eventType: AnalyticsEventType | string, partial: Partial<TrackPayload> = {}): Observable<boolean> {
+    // No-op during SSR / prerender. Real users will track on hydration.
+    if (!this.isBrowser) return of(false);
+
     const consent = this.getConsent();
     const url = new URL(window.location.href);
     const device = this.getDeviceType();
@@ -97,10 +111,7 @@ export class AnalyticsService {
     const referrer = strOrNull(partial.referrer) ?? strOrNull(document.referrer);
     const utmSource = strOrNull(partial.utm_source) ?? strOrNull(url.searchParams.get('utm_source'));
     const computedSource =
-      strOrNull(partial.source) ??
-      utmSource ??
-      this.tryGetHostname(referrer) ??
-      'direct';
+      strOrNull(partial.source) ?? utmSource ?? this.tryGetHostname(referrer) ?? 'direct';
 
     if (eventType === 'section_view' && partial.path) {
       this.viewedSections.add(partial.path.replace('/', ''));
@@ -120,21 +131,28 @@ export class AnalyticsService {
       utm_term: strOrNull(partial.utm_term) ?? strOrNull(url.searchParams.get('utm_term')),
       country: strOrNull(partial.country),
       device: strOrNull(partial.device) ?? strOrNull(device),
-      user_agent: strOrNull(partial.user_agent) ?? strOrNull(navigator.userAgent),
-      language: strOrNull(partial.language) ?? strOrNull(navigator.language),
-      timezone: strOrNull(partial.timezone) ?? strOrNull(Intl.DateTimeFormat().resolvedOptions().timeZone),
-      screen_width: consent ? (partial.screen_width ?? window.screen?.width ?? null) : null,
-      screen_height: consent ? (partial.screen_height ?? window.screen?.height ?? null) : null,
-      session_id: consent ? (partial.session_id ?? this.getSessionId()) : null,
-      color_scheme: consent ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : null,
-      device_memory: consent ? ((navigator as any).deviceMemory || null) : null,
-      hardware_concurrency: consent ? (navigator.hardwareConcurrency || null) : null,
+      user_agent: consent ? strOrNull(partial.user_agent) ?? strOrNull(navigator.userAgent) : null,
+      language: consent ? strOrNull(partial.language) ?? strOrNull(navigator.language) : null,
+      timezone: consent
+        ? strOrNull(partial.timezone) ?? strOrNull(Intl.DateTimeFormat().resolvedOptions().timeZone)
+        : null,
+      screen_width: consent ? partial.screen_width ?? window.screen?.width ?? null : null,
+      screen_height: consent ? partial.screen_height ?? window.screen?.height ?? null : null,
+      session_id: consent ? partial.session_id ?? this.getSessionId() : null,
+      color_scheme: consent
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+        : null,
+      device_memory: consent ? (navigator as any).deviceMemory || null : null,
+      hardware_concurrency: consent ? navigator.hardwareConcurrency || null : null,
       ad_interests: consent ? Array.from(this.viewedSections) : null,
-      ad_click_source: consent ? (url.searchParams.get('gclid') || url.searchParams.get('fbclid') || null) : null,
+      ad_click_source: consent
+        ? url.searchParams.get('gclid') || url.searchParams.get('fbclid') || null
+        : null,
       retargeting_eligible: consent && this.viewedSections.size >= 3,
     };
 
-    // Protection contre le double tracking identique (ex: déclenchement simultané de plusieurs reveals)
     const now = Date.now();
     if (
       this.lastTrackedEvent &&
@@ -146,19 +164,10 @@ export class AnalyticsService {
     }
     this.lastTrackedEvent = { type: payload.event_type || '', path: payload.path || '', time: now };
 
-    console.group('📊 Analytics Event');
-    console.log('Event Type:', payload.event_type);
-    console.log('Payload:', payload);
-    // debugger; // Décommentez pour analyser la pile d'appels si nécessaire
-    console.groupEnd();
-
     return this.http.post<{ success: boolean }>(this.apiUrl, payload).pipe(
-      map(() => {
-        console.log(`✅ [Analytics] Successfully tracked: ${payload.event_type}`);
-        return true;
-      }),
+      map(() => true),
       catchError((error) => {
-        console.error(`❌ [Analytics] Failed to track: ${payload.event_type}`, error);
+        this.logAnalyticsError(`Failed to track: ${payload.event_type}`, error);
         return of(false);
       })
     );
@@ -166,9 +175,9 @@ export class AnalyticsService {
 
   getStats(): Observable<any> {
     return this.http.get<ApiResponse<any>>(this.statsUrl).pipe(
-      map(response => response.success ? response.data : null),
-      catchError(error => {
-        console.error('❌ [Analytics] Failed to fetch stats', error);
+      map((response) => (response.success ? response.data : null)),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch stats', error);
         return of(null);
       })
     );
@@ -177,9 +186,9 @@ export class AnalyticsService {
   getOverview(range?: string): Observable<any> {
     const url = range ? `${this.overviewUrl}?range=${range}` : this.overviewUrl;
     return this.http.get<ApiResponse<any>>(url).pipe(
-      map(response => response.success ? response.data : null),
-      catchError(error => {
-        console.error('❌ [Analytics] Failed to fetch overview', error);
+      map((response) => (response.success ? response.data : null)),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch overview', error);
         return of(null);
       })
     );
@@ -188,9 +197,9 @@ export class AnalyticsService {
   getDailyStats(range?: string): Observable<any[]> {
     const url = range ? `${this.dailyUrl}?range=${range}` : this.dailyUrl;
     return this.http.get<ApiResponse<any[]>>(url).pipe(
-      map(response => response.success ? response.data : []),
-      catchError(error => {
-        console.error('❌ [Analytics] Failed to fetch daily stats', error);
+      map((response) => (response.success ? response.data : [])),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch daily stats', error);
         return of([]);
       })
     );
@@ -199,9 +208,9 @@ export class AnalyticsService {
   getSources(range?: string): Observable<any[]> {
     const url = range ? `${this.sourcesUrl}?range=${range}` : this.sourcesUrl;
     return this.http.get<ApiResponse<any[]>>(url).pipe(
-      map(response => response.success ? response.data : []),
-      catchError(error => {
-        console.error('❌ [Analytics] Failed to fetch sources', error);
+      map((response) => (response.success ? response.data : [])),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch sources', error);
         return of([]);
       })
     );
@@ -210,9 +219,9 @@ export class AnalyticsService {
   getCountries(range?: string): Observable<any[]> {
     const url = range ? `${this.countriesUrl}?range=${range}` : this.countriesUrl;
     return this.http.get<ApiResponse<any[]>>(url).pipe(
-      map(response => response.success ? response.data : []),
-      catchError(error => {
-        console.error('❌ [Analytics] Failed to fetch countries', error);
+      map((response) => (response.success ? response.data : [])),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch countries', error);
         return of([]);
       })
     );
@@ -221,9 +230,9 @@ export class AnalyticsService {
   getDevices(range?: string): Observable<any[]> {
     const url = range ? `${this.devicesUrl}?range=${range}` : this.devicesUrl;
     return this.http.get<ApiResponse<any[]>>(url).pipe(
-      map(response => response.success ? response.data : []),
-      catchError(error => {
-        console.error('❌ [Analytics] Failed to fetch devices', error);
+      map((response) => (response.success ? response.data : [])),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch devices', error);
         return of([]);
       })
     );
@@ -232,9 +241,9 @@ export class AnalyticsService {
   getBrowsers(range?: string): Observable<any[]> {
     const url = range ? `${this.browsersUrl}?range=${range}` : this.browsersUrl;
     return this.http.get<ApiResponse<any[]>>(url).pipe(
-      map(response => response.success ? response.data : []),
-      catchError(error => {
-        console.error('❌ [Analytics] Failed to fetch browsers', error);
+      map((response) => (response.success ? response.data : [])),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch browsers', error);
         return of([]);
       })
     );
@@ -243,9 +252,9 @@ export class AnalyticsService {
   getTopPages(range?: string): Observable<any[]> {
     const url = range ? `${this.topPagesUrl}?range=${range}` : this.topPagesUrl;
     return this.http.get<ApiResponse<any[]>>(url).pipe(
-      map(response => response.success ? response.data : []),
-      catchError(error => {
-        console.error('❌ [Analytics] Failed to fetch top pages', error);
+      map((response) => (response.success ? response.data : [])),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch top pages', error);
         return of([]);
       })
     );
@@ -253,9 +262,9 @@ export class AnalyticsService {
 
   getRecentEvents(): Observable<any[]> {
     return this.http.get<ApiResponse<any[]>>(this.eventsUrl).pipe(
-      map(response => response.success ? response.data : []),
-      catchError(error => {
-        console.error('❌ [Analytics] Failed to fetch recent events', error);
+      map((response) => (response.success ? response.data : [])),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch recent events', error);
         return of([]);
       })
     );
@@ -271,12 +280,14 @@ export class AnalyticsService {
   }
 
   private getDeviceType(): string {
+    if (!this.isBrowser) return 'desktop';
     if (window.matchMedia('(max-width: 768px)').matches) return 'mobile';
     if (window.matchMedia('(max-width: 1024px)').matches) return 'tablet';
     return 'desktop';
   }
 
   private getSessionId(): string {
+    if (!this.isBrowser) return '';
     const existing = localStorage.getItem(this.sessionKey);
     if (existing) return existing;
     const id = this.generateId();
@@ -287,7 +298,14 @@ export class AnalyticsService {
   private generateId(): string {
     const buf = new Uint8Array(16);
     crypto.getRandomValues(buf);
-    return Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join('');
+    return Array.from(buf)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  private logAnalyticsError(message: string, error: unknown): void {
+    if (!environment.production) {
+      console.warn(`[Analytics] ${message}`, error);
+    }
   }
 }
-

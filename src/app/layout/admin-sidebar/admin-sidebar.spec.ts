@@ -1,19 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { AdminSidebarComponent } from './admin-sidebar';
 
-import { AdminSidebar } from './admin-sidebar';
-
-describe('AdminSidebar', () => {
-  let component: AdminSidebar;
-  let fixture: ComponentFixture<AdminSidebar>;
+describe('AdminSidebarComponent', () => {
+  let component: AdminSidebarComponent;
+  let fixture: ComponentFixture<AdminSidebarComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminSidebar],
+      imports: [AdminSidebarComponent],
+      providers: [provideHttpClient(), provideRouter([])],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AdminSidebar);
+    fixture = TestBed.createComponent(AdminSidebarComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
   });
 
   it('should create', () => {

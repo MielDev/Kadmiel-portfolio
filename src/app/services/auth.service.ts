@@ -1,31 +1,44 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { ApiResponse } from '../models/api-response.model';
 import { Observable, map, tap } from 'rxjs';
 
+/**
+ * SSR-safe: every access to `localStorage` is guarded by `isPlatformBrowser`,
+ * so the service can be instantiated during server rendering without crashing.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly tokenKey = 'auth_token';
   private apiUrl = `${environment.apiUrl}/auth`;
+  private readonly isBrowser: boolean;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, @Inject(PLATFORM_ID) platformId: Object) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
 
   login(username: string, password: string): Observable<void> {
-    return this.http.post<ApiResponse<{ token: string }>>(`${this.apiUrl}/login`, { username, password }).pipe(
-      map(response => response.data),
-      tap(data => localStorage.setItem(this.tokenKey, data.token)),
-      map(() => undefined)
-    );
+    return this.http
+      .post<ApiResponse<{ token: string }>>(`${this.apiUrl}/login`, { username, password })
+      .pipe(
+        map((response) => response.data),
+        tap((data) => {
+          if (this.isBrowser) localStorage.setItem(this.tokenKey, data.token);
+        }),
+        map(() => undefined)
+      );
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
+    if (this.isBrowser) localStorage.removeItem(this.tokenKey);
   }
 
   getToken(): string | null {
+    if (!this.isBrowser) return null;
     return localStorage.getItem(this.tokenKey);
   }
 
@@ -44,12 +57,12 @@ export class AuthService {
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
-    
+
     if (this.isTokenExpired(token)) {
       this.logout();
       return false;
     }
-    
+
     return true;
   }
 }

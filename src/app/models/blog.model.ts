@@ -8,4 +8,5 @@ export interface Blog {
   tags: string[];
   status: 'draft' | 'published';
   created_at: string;
+  link_url?: string | null;
 }

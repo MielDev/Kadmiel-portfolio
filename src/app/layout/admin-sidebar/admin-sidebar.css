@@ -55,6 +55,14 @@
   background-clip:text;color:var(--violet);
   box-shadow:var(--glow-v);
   animation:logoPulse 4s ease-in-out infinite;
+  overflow:hidden;
+}
+
+.sidebar-logo-mark img,
+.user-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
 }
 @keyframes logoPulse{0%,100%{box-shadow:var(--glow-v)}50%{box-shadow:0 0 40px rgba(124,58,237,.7)}}
 .sidebar-logo-text{overflow:hidden;}
@@ -116,6 +124,7 @@
   background:linear-gradient(135deg,var(--violet),var(--red));
   display:flex;align-items:center;justify-content:center;
   font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;color:#fff;
+  overflow:hidden;
 }
 .user-name{font-size:.8rem;font-weight:600;line-height:1.2;}
 .user-role{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.08em;}

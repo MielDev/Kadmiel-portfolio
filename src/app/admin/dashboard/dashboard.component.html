@@ -197,7 +197,7 @@
           <span style="position:absolute;font-family:'JetBrains Mono',monospace;font-size:.65rem;
             color:rgba(255,255,255,.6);top:1rem;left:1rem;letter-spacing:.1em;">MONDE</span>
           <div class="map-label">
-            <span *ngFor="let c of visitorCountries.slice(0, 4)">● {{ c.country || 'Inconnu' }}  </span>
+            <span *ngFor="let c of visitorCountries.slice(0, 4)"><i class="fa-solid fa-circle"></i> {{ c.country || 'Inconnu' }}  </span>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-top:1.2rem;">

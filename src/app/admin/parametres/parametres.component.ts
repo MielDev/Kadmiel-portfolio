@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../services/settings.service';
 import { forkJoin } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-parametres',
@@ -19,6 +20,7 @@ export class ParametresComponent implements OnInit, OnDestroy, AfterViewInit {
   errorMessage: string | null = null;
   activeSection = 'apparence';
   currentTime: string = '00:00:00';
+  uploadingAssets: Record<string, boolean> = {};
   private clockInterval: any;
 
   // Settings data
@@ -38,12 +40,12 @@ export class ParametresComponent implements OnInit, OnDestroy, AfterViewInit {
       floatingCv: true
     },
     hero: {
-      eyebrow: '👋 Salut, je suis',
+      eyebrow: 'Salut, je suis',
       name: 'KADMIEL',
       title: 'Développeur Full Stack',
       description: "Passionné par la création d'applications web & mobiles modernes alliant performance, sécurité et expérience utilisateur.",
-      cta1: '🔴 Voir mes projets',
-      cta2: '✉️ Me contacter',
+      cta1: 'Voir mes projets',
+      cta2: 'Me contacter',
       stat1Val: '12+',
       stat1Lbl: 'Projets réalisés',
       stat2Val: '3+',
@@ -56,6 +58,8 @@ export class ParametresComponent implements OnInit, OnDestroy, AfterViewInit {
       logoText: 'KT.',
       logoSub: 'PORTFOLIO v2.2',
       logoImage: null,
+      favicon: null,
+      siteIcon: null,
       fullName: 'Kadmiel TOGNON',
       footerRights: 'Tous droits réservés.',
       location: 'Le Mans, France'
@@ -80,7 +84,8 @@ export class ParametresComponent implements OnInit, OnDestroy, AfterViewInit {
       description: 'Portfolio de Kadmiel TOGNON, développeur Full Stack passionné. Angular, React, Node.js, Laravel, Docker. Disponible pour stage, alternance ou mission au Mans ou en remote.',
       url: 'https://kadmieltognon.dev',
       keywords: 'développeur full stack, Angular, Node.js, Le Mans',
-      ogTitle: ''
+      ogTitle: '',
+      ogImage: null
     },
     notifications: {
       emailNewMessage: true,
@@ -129,7 +134,7 @@ export class ParametresComponent implements OnInit, OnDestroy, AfterViewInit {
           // Merge loaded settings with defaults
           Object.keys(data).forEach(key => {
             if (this.settings.hasOwnProperty(key)) {
-              this.settings[key] = data[key];
+              this.settings[key] = this.mergeSettingValue(this.settings[key], data[key]);
             }
           });
         }
@@ -143,15 +148,27 @@ export class ParametresComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  private mergeSettingValue(defaultValue: any, loadedValue: any): any {
+    const isObject = (value: any) =>
+      value !== null && typeof value === 'object' && !Array.isArray(value);
+
+    if (isObject(defaultValue) && isObject(loadedValue)) {
+      return { ...defaultValue, ...loadedValue };
+    }
+
+    return loadedValue;
+  }
+
   saveSection(section: string): void {
     if (section === 'apparence') {
-      // For Appearance, we save both 'theme' and 'colors'
+      // Sauvegarder theme, colors ET display.darkMode (essentiel pour la synchro front)
       const dataToSave = {
         theme: this.settings.theme,
-        colors: this.settings.colors
+        colors: this.settings.colors,
+        display: this.settings.display
       };
       this.settingsService.updateMultipleSettings(dataToSave).subscribe({
-        next: () => this.showToast('Paramètres apparence sauvegardés !', 'success'),
+        next: () => this.showToast('Thème sauvegardé et appliqué sur le site !', 'success'),
         error: () => this.showToast('Erreur lors de la sauvegarde.', 'error')
       });
       return;
@@ -216,18 +233,41 @@ export class ParametresComponent implements OnInit, OnDestroy, AfterViewInit {
   // Helper for theme selection
   selectTheme(themeId: string): void {
     this.settings.theme = themeId;
-    // Preset colors for themes
-    const themes: any = {
-      kadmiel: { bg: '#070B14', primary: '#FF3B3B', secondary: '#7C3AED', text: '#E5E7EB' },
-      cyber: { bg: '#000A0A', primary: '#00FF88', secondary: '#00BFFF', text: '#E5E7EB' },
-      neon: { bg: '#0a000f', primary: '#FF00FF', secondary: '#00CFFF', text: '#E5E7EB' },
-      gold: { bg: '#0A0800', primary: '#FFD700', secondary: '#FF8C00', text: '#E5E7EB' },
-      ice: { bg: '#f0f4ff', primary: '#4F46E5', secondary: '#06B6D4', text: '#1F2937' }
+
+    // Chaque thème définit : couleurs + si le site est en mode sombre ou clair
+    const themes: Record<string, { bg: string; primary: string; secondary: string; text: string; dark: boolean }> = {
+      kadmiel:    { bg: '#070B14', primary: '#FF3B3B', secondary: '#7C3AED', text: '#E5E7EB', dark: true  },
+      cyber:      { bg: '#000A0A', primary: '#00FF88', secondary: '#00BFFF', text: '#E5E7EB', dark: true  },
+      neon:       { bg: '#0a000f', primary: '#FF00FF', secondary: '#00CFFF', text: '#E5E7EB', dark: true  },
+      gold:       { bg: '#0A0800', primary: '#FFD700', secondary: '#FF8C00', text: '#E5E7EB', dark: true  },
+      ice:        { bg: '#f0f4ff', primary: '#4F46E5', secondary: '#06B6D4', text: '#1F2937', dark: false },
+      midnight:   { bg: '#010B1A', primary: '#3B82F6', secondary: '#8B5CF6', text: '#E5E7EB', dark: true  },
+      forest:     { bg: '#030F08', primary: '#10B981', secondary: '#34D399', text: '#E5E7EB', dark: true  },
+      rose:       { bg: '#100510', primary: '#EC4899', secondary: '#A855F7', text: '#E5E7EB', dark: true  },
+      mono:       { bg: '#0A0A0A', primary: '#FFFFFF', secondary: '#9CA3AF', text: '#E5E7EB', dark: true  },
+      sunset:     { bg: '#0F0508', primary: '#F97316', secondary: '#EC4899', text: '#E5E7EB', dark: true  },
     };
-    if (themes[themeId]) {
-      this.settings.colors = { ...themes[themeId] };
+
+    const preset = themes[themeId];
+    if (preset) {
+      this.settings.colors = { bg: preset.bg, primary: preset.primary, secondary: preset.secondary, text: preset.text };
+      // Synchroniser le mode dark/light du site selon le thème choisi
+      this.settings.display = { ...this.settings.display, darkMode: preset.dark };
     }
-    this.showToast(`Thème ${themeId.toUpperCase()} appliqué !`, 'info');
+
+    const names: Record<string, string> = {
+      kadmiel: 'KADMIEL SIGNATURE', cyber: 'CYBER GREEN', neon: 'NEON TOKYO',
+      gold: 'GOLD PREMIUM', ice: 'ICE LIGHT', midnight: 'MIDNIGHT BLUE',
+      forest: 'FOREST', rose: 'ROSE', mono: 'MONOCHROME', sunset: 'SUNSET'
+    };
+    this.showToast(`Thème "${names[themeId] ?? themeId}" sélectionné — clique sur Sauvegarder pour l'appliquer.`, 'info');
+  }
+
+  // Synchronise les color pickers (input type=color → hex text et vice-versa)
+  onColorPickerChange(field: 'bg' | 'primary' | 'secondary' | 'text', value: string): void {
+    this.settings.colors[field] = value;
+    // Marquer comme thème personnalisé
+    this.settings.theme = 'custom';
   }
 
   // Toast logic
@@ -255,7 +295,7 @@ export class ParametresComponent implements OnInit, OnDestroy, AfterViewInit {
       cr.style.top = e.clientY + 'px';
     });
 
-    document.querySelectorAll('button, a, input, select, textarea, .nav-item, .user-card, .settings-nav-item, .theme-card, .palette-preset, .logo-upload-area, .font-card, .color-swatch').forEach(el => {
+    document.querySelectorAll('button, a, input, select, textarea, .nav-item, .user-card, .settings-nav-item, .theme-card, .palette-preset, .logo-upload-area, .asset-upload-card, .font-card, .color-swatch').forEach(el => {
       el.addEventListener('mouseenter', () => {
         cr.style.width = '44px';
         cr.style.height = '44px';
@@ -269,22 +309,60 @@ export class ParametresComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  // Logo upload simulation
-  handleLogoUpload(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      // Validate file size (2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        this.showToast('⚠️ Fichier trop volumineux (max 2 Mo)', 'error');
-        return;
-      }
+  getAssetUrl(value: string | null | undefined): string {
+    if (!value) return '';
+    if (value.startsWith('data:') || value.startsWith('blob:') || value.startsWith('http')) return value;
 
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.settings.branding.logoImage = e.target.result;
-        this.showToast('📤 Logo mis à jour (aperçu)', 'success');
-      };
-      reader.readAsDataURL(file);
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    return `${baseUrl}${value.startsWith('/') ? '' : '/'}${value}`;
+  }
+
+  handleAssetUpload(event: Event, section: 'branding' | 'seo', key: string, label: string): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const uploadKey = `${section}.${key}`;
+    this.uploadingAssets[uploadKey] = true;
+
+    this.settingsService.uploadSettingsAsset(file, key).subscribe({
+      next: (asset) => {
+        this.settings[section][key] = asset.url;
+
+        if (section === 'branding' && key === 'logoImage') {
+          this.settings.branding.logoType = 'image';
+        }
+
+        this.settingsService.updateSetting(section, this.settings[section]).subscribe({
+          next: () => {
+            this.uploadingAssets[uploadKey] = false;
+            this.showToast(`${label} mis à jour.`, 'success');
+          },
+          error: () => {
+            this.uploadingAssets[uploadKey] = false;
+            this.showToast(`${label} uploadé, mais non sauvegardé.`, 'error');
+          }
+        });
+      },
+      error: () => {
+        this.uploadingAssets[uploadKey] = false;
+        this.showToast(`Erreur lors de l'upload : ${label}.`, 'error');
+      }
+    });
+
+    input.value = '';
+  }
+
+  useLogoAsFavicon(): void {
+    if (!this.settings.branding.logoImage) {
+      this.showToast('Ajoutez d’abord un logo.', 'error');
+      return;
     }
+
+    this.settings.branding.favicon = this.settings.branding.logoImage;
+    this.settingsService.updateSetting('branding', this.settings.branding).subscribe({
+      next: () => this.showToast('Favicon généré depuis le logo.', 'success'),
+      error: () => this.showToast('Erreur lors de la sauvegarde du favicon.', 'error')
+    });
   }
 }

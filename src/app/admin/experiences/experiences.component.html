@@ -14,28 +14,28 @@
       <!-- MINI STATS -->
       <div class="mini-stats">
         <div class="mini-stat">
-          <span class="mini-stat-icon">📁</span>
+          <span class="mini-stat-icon"><i class="fa-solid fa-folder-open"></i></span>
           <div>
             <div class="mini-stat-val" style="background:linear-gradient(135deg,#fff,var(--violet));-webkit-background-clip: text;background-clip: text;-webkit-text-fill-color: transparent;">{{ counts.total }}</div>
             <div class="mini-stat-label">Total entrées</div>
           </div>
         </div>
         <div class="mini-stat">
-          <span class="mini-stat-icon">💼</span>
+          <span class="mini-stat-icon"><i class="fa-solid fa-briefcase"></i></span>
           <div>
             <div class="mini-stat-val" style="-webkit-text-fill-color:var(--red);">{{ counts.work }}</div>
             <div class="mini-stat-label">Emplois</div>
           </div>
         </div>
         <div class="mini-stat">
-          <span class="mini-stat-icon">📋</span>
+          <span class="mini-stat-icon"><i class="fa-solid fa-clipboard-list"></i></span>
           <div>
             <div class="mini-stat-val" style="-webkit-text-fill-color:var(--yellow);">{{ counts.stage }}</div>
             <div class="mini-stat-label">Stages</div>
           </div>
         </div>
         <div class="mini-stat">
-          <span class="mini-stat-icon">🎓</span>
+          <span class="mini-stat-icon"><i class="fa-solid fa-graduation-cap"></i></span>
           <div>
             <div class="mini-stat-val" style="-webkit-text-fill-color:var(--violet);">{{ counts.edu }}</div>
             <div class="mini-stat-label">Formations</div>
@@ -47,21 +47,21 @@
       <div class="toolbar">
         <div class="toolbar-left">
           <div class="search-box">
-            <span style="color:var(--muted);font-size:.9rem;">🔍</span>
+            <span style="color:var(--muted);font-size:.9rem;"><i class="fa-solid fa-magnifying-glass"></i></span>
             <input type="text" placeholder="Rechercher…" [(ngModel)]="searchQuery" (input)="applyFilters()">
           </div>
           <button class="filter-btn" [class.active]="curFilter === 'all'" (click)="setFilter('all')">Tout</button>
-          <button class="filter-btn" [class.active]="curFilter === 'work'" (click)="setFilter('work')">💼 Emploi</button>
-          <button class="filter-btn" [class.active]="curFilter === 'stage'" (click)="setFilter('stage')">📋 Stage</button>
-          <button class="filter-btn" [class.active]="curFilter === 'edu'" (click)="setFilter('edu')">🎓 Formation</button>
-          <button class="filter-btn" [class.active]="curFilter === 'freelance'" (click)="setFilter('freelance')">🚀 Freelance</button>
+          <button class="filter-btn" [class.active]="curFilter === 'work'" (click)="setFilter('work')"><i class="fa-solid fa-briefcase"></i> Emploi</button>
+          <button class="filter-btn" [class.active]="curFilter === 'stage'" (click)="setFilter('stage')"><i class="fa-solid fa-clipboard-list"></i> Stage</button>
+          <button class="filter-btn" [class.active]="curFilter === 'edu'" (click)="setFilter('edu')"><i class="fa-solid fa-graduation-cap"></i> Formation</button>
+          <button class="filter-btn" [class.active]="curFilter === 'freelance'" (click)="setFilter('freelance')"><i class="fa-solid fa-rocket"></i> Freelance</button>
           
           <div class="view-toggle">
-            <button class="view-btn" [class.active]="curView === 'grid'" (click)="setView('grid')" title="Grille">⊞</button>
-            <button class="view-btn" [class.active]="curView === 'list'" (click)="setView('list')" title="Liste">☰</button>
+            <button class="view-btn" [class.active]="curView === 'grid'" (click)="setView('grid')" title="Grille"><i class="fa-solid fa-table-cells-large"></i></button>
+            <button class="view-btn" [class.active]="curView === 'list'" (click)="setView('list')" title="Liste"><i class="fa-solid fa-list"></i></button>
           </div>
         </div>
-        <button class="btn-add" (click)="openModal()"><span>✦ Ajouter une entrée</span></button>
+        <button class="btn-add" (click)="openModal()"><span><i class="fa-solid fa-plus"></i> Ajouter une entrée</span></button>
       </div>
 
       <!-- CARDS GRID -->
@@ -92,10 +92,10 @@
 
       <!-- EMPTY STATE -->
       <div class="empty-state" *ngIf="filteredExperiences.length === 0 && !isLoading">
-        <div class="empty-icon">🏢</div>
+        <div class="empty-icon"><i class="fa-solid fa-building"></i></div>
         <div class="empty-title">Aucune entrée trouvée</div>
         <div class="empty-desc">Essayez un autre filtre ou ajoutez une nouvelle entrée.</div>
-        <button class="btn-add" style="margin:0 auto;" (click)="openModal()"><span>✦ Ajouter</span></button>
+        <button class="btn-add" style="margin:0 auto;" (click)="openModal()"><span><i class="fa-solid fa-plus"></i> Ajouter</span></button>
       </div>
 
       <!-- LOADING STATE -->
@@ -112,7 +112,7 @@
       <div class="card-header-strip" [style.--strip-bg]="getStripBg(exp.type)">
         <div class="card-company">
           <div class="company-logo" [style.background]="(exp.color || getTypeColor(exp.type)) + '18'" [style.border-color]="(exp.color || getTypeColor(exp.type)) + '30'">
-            {{ exp.icon || '🏢' }}
+            <i [class]="exp.icon || getTypeIcon(exp.type)"></i>
           </div>
           {{ exp.company }}
         </div>
@@ -129,17 +129,20 @@
           <span class="card-current" *ngIf="exp.current === 1">
             <span class="card-status-dot" style="animation: currentPulse 2s infinite;"></span>En cours
           </span>
-          <span *ngIf="exp.location" style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);">📍 {{ exp.location }}</span>
+          <span *ngIf="exp.location" style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);"><i class="fa-solid fa-location-dot"></i> {{ exp.location }}</span>
         </div>
         <div class="card-desc" *ngIf="exp.description && exp.description.length > 0">{{ exp.description[0] }}</div>
         <ul class="card-tasks">
           <li *ngFor="let task of (exp.description || []).slice(0, 3)">{{ task }}</li>
         </ul>
+        <a *ngIf="exp.digital_folder_url" class="card-digital-folder" [href]="exp.digital_folder_url" target="_blank" rel="noopener">
+          <i class="fa-solid fa-folder-open"></i> Dossier numérique
+        </a>
         <div class="card-footer">
           <div class="card-duration">{{ getDuration(exp.start_date, exp.end_date) }}</div>
           <div class="card-actions">
-            <button class="btn-edit" (click)="openModal(exp)">✏️ Éditer</button>
-            <button class="btn-del" (click)="openDeleteModal(exp)">🗑</button>
+            <button class="btn-edit" (click)="openModal(exp)"><i class="fa-solid fa-pen"></i> Éditer</button>
+            <button class="btn-del" (click)="openDeleteModal(exp)"><i class="fa-solid fa-trash"></i></button>
           </div>
         </div>
       </div>
@@ -154,7 +157,7 @@
           <div class="modal-title-dot"></div>
           <span>{{ editingExperience ? 'Modifier l\'entrée' : 'Nouvelle entrée' }}</span>
         </div>
-        <button class="modal-close" (click)="closeModal()">✕</button>
+        <button class="modal-close" (click)="closeModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
@@ -165,10 +168,10 @@
           <div class="form-group">
             <div class="form-label">Type <span class="req">*</span></div>
             <select class="form-select" [(ngModel)]="formData.type">
-              <option value="work">💼 Emploi</option>
-              <option value="stage">📋 Stage</option>
-              <option value="edu">🎓 Formation</option>
-              <option value="freelance">🚀 Freelance</option>
+              <option value="work">Emploi</option>
+              <option value="stage">Stage</option>
+              <option value="edu">Formation</option>
+              <option value="freelance">Freelance</option>
             </select>
           </div>
           <div class="form-group">
@@ -189,6 +192,12 @@
             <div class="form-hint" *ngIf="formData.current_bool">Désactivé car "Poste actuel" est coché.</div>
           </div>
           <div class="form-group full">
+            <div class="form-label">Lien du dossier numérique</div>
+            <input class="form-input" type="url" [(ngModel)]="formData.digital_folder_url"
+              placeholder="https://drive.google.com/…">
+            <div class="form-hint">À utiliser pour la formation Services numériques aux organisations.</div>
+          </div>
+          <div class="form-group full">
             <div class="form-label">Missions <span style="color:var(--muted);">(une par ligne)</span></div>
             <textarea class="form-textarea" style="min-height:110px;" [(ngModel)]="formData.description_text"
               placeholder="Développement d'applications web Full-Stack&#10;Maintenance et évolution des applications&#10;…"></textarea>
@@ -196,7 +205,7 @@
           </div>
           <div class="form-group full">
             <div class="check-row" (click)="toggleCurrent()">
-              <div class="check-box" [class.on]="formData.current_bool">{{ formData.current_bool ? '✓' : '' }}</div>
+              <div class="check-box" [class.on]="formData.current_bool"><i *ngIf="formData.current_bool" class="fa-solid fa-check"></i></div>
               <div class="check-label">Afficher comme poste actuel (dot pulsant + badge "En cours")</div>
             </div>
           </div>
@@ -205,7 +214,7 @@
       <div class="modal-foot">
         <button class="btn-cancel" (click)="closeModal()">Annuler</button>
         <button class="btn-save-m" (click)="saveExperience()">
-          <span>{{ editingExperience ? '💾 Mettre à jour' : '💾 Enregistrer' }}</span>
+          <span><i class="fa-solid fa-floppy-disk"></i> {{ editingExperience ? 'Mettre à jour' : 'Enregistrer' }}</span>
         </button>
       </div>
     </div>
@@ -214,12 +223,12 @@
   <!-- ══ DELETE CONFIRM ══ -->
   <div class="modal-backdrop" [class.open]="isDeleteModalOpen" (click)="$event.target === delBd && closeDeleteModal()" #delBd>
     <div class="confirm-modal">
-      <div class="confirm-icon">⚠️</div>
+      <div class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
       <div class="confirm-title">Supprimer l'entrée ?</div>
       <div class="confirm-text"><strong style="color:var(--text);">"{{ experienceToDelete?.company }}"</strong> sera définitivement supprimée de votre portfolio.</div>
       <div class="confirm-actions" style="display:flex;gap:.8rem;justify-content:center;">
         <button class="btn-cancel" (click)="closeDeleteModal()">Annuler</button>
-        <button class="btn-confirm-del" (click)="confirmDelete()">🗑 Supprimer</button>
+        <button class="btn-confirm-del" (click)="confirmDelete()"><i class="fa-solid fa-trash"></i> Supprimer</button>
       </div>
     </div>
   </div>

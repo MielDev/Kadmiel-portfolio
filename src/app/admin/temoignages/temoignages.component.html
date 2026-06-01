@@ -8,10 +8,10 @@
       </div>
       <div style="display: flex; gap: 1rem;">
         <button class="btn-save-main" style="background: var(--accent-violet); box-shadow: var(--glow-violet);" (click)="copyPublicLink()">
-          <span>🔗 Lien Public</span>
+          <span><i class="fa-solid fa-link"></i> Lien Public</span>
         </button>
         <button class="btn-save-main" style="background: linear-gradient(90deg, #38BDF8, #7C3AED); box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);" (click)="generateUniqueLink()">
-          <span>✨ Lien Unique (1 use)</span>
+          <span><i class="fa-solid fa-wand-magic-sparkles"></i> Lien Unique (1 use)</span>
         </button>
         <button class="btn-save-main" (click)="openAddModal()">
           <span>+ Ajouter</span>
@@ -66,8 +66,8 @@
               </td>
               <td>
                 <div class="action-btns">
-                  <button class="btn-icon" (click)="openAddModal(t)">✏️</button>
-                  <button class="btn-icon btn-delete" (click)="openDeleteModal(t.id, t.name)">🗑</button>
+                  <button class="btn-icon" (click)="openAddModal(t)" title="Modifier"><i class="fa-solid fa-pen"></i></button>
+                  <button class="btn-icon btn-delete" (click)="openDeleteModal(t.id, t.name)" title="Supprimer"><i class="fa-solid fa-trash"></i></button>
                 </div>
               </td>
             </tr>
@@ -86,7 +86,7 @@
         <div class="panel-dot"></div>
         {{ editingTestimonial ? 'Modifier' : 'Ajouter' }} un témoignage
       </div>
-      <button class="btn-icon" (click)="closeAddModal()">✕</button>
+      <button class="btn-icon" (click)="closeAddModal()" title="Fermer"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
@@ -94,7 +94,7 @@
           <img *ngIf="testimonialForm.photo" [src]="getPhotoUrl(testimonialForm.photo)" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
           <span *ngIf="!testimonialForm.photo">{{ getInitials(testimonialForm.name) }}</span>
           <div style="position: absolute; bottom: 0; right: 0; background: var(--accent-violet); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #fff; border: 2px solid var(--bg-card);">
-            📷
+            <i class="fa-solid fa-camera"></i>
           </div>
         </div>
         <input #photoInput type="file" (change)="onPhotoSelected($event)" style="display: none;" accept="image/*">
@@ -142,7 +142,7 @@
 <div class="modal-backdrop" [class.open]="showDeleteModal" (click)="closeDeleteModal()">
   <div class="modal" style="max-width: 400px; text-align: center;" (click)="$event.stopPropagation()">
     <div class="modal-body" style="padding: 3rem 2rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+      <div style="font-size: 3rem; margin-bottom: 1rem;"><i class="fa-solid fa-triangle-exclamation"></i></div>
       <div class="panel-title" style="justify-content: center; margin-bottom: 1rem;">Supprimer le témoignage ?</div>
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">
         Voulez-vous vraiment supprimer l'avis de <strong>{{ deleteTestimonialName }}</strong> ? Cette action est irréversible.

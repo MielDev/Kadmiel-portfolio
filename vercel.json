@@ -1,0 +1,18 @@
+{
+  "buildCommand": "npm run build -- --configuration production",
+  "outputDirectory": "dist/portfolio-kadmiel/browser",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://apis.episoletudiantedumans.fr/api/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "https://apis.episoletudiantedumans.fr/uploads/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

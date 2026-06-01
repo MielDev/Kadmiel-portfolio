@@ -571,9 +571,14 @@ html {
 }
 
 .card-tasks li::before {
-  content: '▸';
+  content: '';
+  width: .32rem;
+  height: .32rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
   flex-shrink: 0;
-  margin-top: .05rem;
+  margin-top: .45rem;
 }
 
 .card-tasks-more {
@@ -589,6 +594,31 @@ html {
 
 .card-tasks-more:hover {
   color: var(--violet);
+}
+
+.card-digital-folder {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-bottom: .9rem;
+  padding: .42rem .75rem;
+  border: 1px solid rgba(124, 58, 237, .35);
+  border-radius: 6px;
+  color: var(--violet);
+  background: rgba(124, 58, 237, .08);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all .2s;
+}
+
+.card-digital-folder:hover {
+  border-color: var(--red);
+  color: var(--text);
+  box-shadow: var(--glow-v);
+  transform: translateY(-1px);
 }
 
 /* skills chips */

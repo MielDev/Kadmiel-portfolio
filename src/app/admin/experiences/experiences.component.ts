@@ -38,10 +38,10 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
   experienceToDelete: Experience | null = null;
   
   TYPE_CFG: any = {
-    work:      {label:'💼 Emploi',     cls:'type-work',     color:'#FF3B3B', stripBg:'rgba(255,59,59,.06)'},
-    stage:     {label:'📋 Stage',      cls:'type-stage',    color:'#FBBF24', stripBg:'rgba(251,191,36,.06)'},
-    edu:       {label:'🎓 Formation',  cls:'type-edu',      color:'#7C3AED', stripBg:'rgba(124,58,237,.08)'},
-    freelance: {label:'🚀 Freelance',  cls:'type-freelance',color:'#38BDF8', stripBg:'rgba(56,189,248,.06)'},
+    work: { label: 'Emploi', icon: 'fa-solid fa-briefcase', cls: 'type-work', color: '#FF3B3B', stripBg: 'rgba(255,59,59,.06)' },
+    stage: { label: 'Stage', icon: 'fa-solid fa-clipboard-list', cls: 'type-stage', color: '#FBBF24', stripBg: 'rgba(251,191,36,.06)' },
+    edu: { label: 'Formation', icon: 'fa-solid fa-graduation-cap', cls: 'type-edu', color: '#7C3AED', stripBg: 'rgba(124,58,237,.08)' },
+    freelance: { label: 'Freelance', icon: 'fa-solid fa-rocket', cls: 'type-freelance', color: '#38BDF8', stripBg: 'rgba(56,189,248,.06)' },
   };
 
   // Current Modal Form Data
@@ -53,8 +53,9 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
     start_date: '',
     end_date: '',
     description_text: '',
+    digital_folder_url: '',
     skills: '',
-    icon: '🏢',
+    icon: 'fa-solid fa-building',
     color: '#7C3AED',
     current: 0
   };
@@ -189,10 +190,7 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
 
   private inferIcon(exp: Experience): string {
     const type = (exp as any).type || this.inferType(exp);
-    if (type === 'edu') return '🎓';
-    if (type === 'stage') return '📋';
-    if (type === 'freelance') return '🚀';
-    return '🏢';
+    return this.TYPE_CFG[type]?.icon || 'fa-solid fa-building';
   }
 
   private inferColor(exp: Experience): string {
@@ -200,7 +198,7 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
     return this.TYPE_CFG[type]?.color || '#7C3AED';
   }
 
-  private formatDateForInput(dateStr: string): string {
+  private formatDateForInput(dateStr: string | null): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return '';
@@ -237,6 +235,7 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
         start_date: this.formatDateForInput(experience.start_date),
         end_date: this.formatDateForInput(experience.end_date),
         description_text: (experience.description || []).join('\n'),
+        digital_folder_url: experience.digital_folder_url || '',
         current_bool: experience.current === 1
       };
     } else {
@@ -244,6 +243,7 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
       this.formData = {
         company: '', title: '', type: 'work', location: '',
         start_date: '', end_date: '', description_text: '',
+        digital_folder_url: '',
         skills: '',
         current: 0, current_bool: false
       };
@@ -271,7 +271,8 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
       description: this.formData.description_text.split('\n').filter((t: string) => t.trim().length > 0),
       current: this.formData.current_bool ? 1 : 0,
       start_date: this.formData.start_date,
-      end_date: (this.formData.current_bool || !this.formData.end_date) ? null : this.formData.end_date
+      end_date: (this.formData.current_bool || !this.formData.end_date) ? null : this.formData.end_date,
+      digital_folder_url: this.formData.digital_folder_url?.trim() || null
     };
 
     if (this.editingExperience && this.editingExperience.id) {
@@ -315,7 +316,7 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
     }
   }
 
-  getDuration(start: string, end: string): string {
+  getDuration(start: string, end: string | null): string {
     if (!start) return '';
     const a = new Date(start);
     if (isNaN(a.getTime())) return '';
@@ -339,6 +340,10 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
 
   getTypeClass(type: string): string {
     return this.TYPE_CFG[type]?.cls || 'type-edu';
+  }
+
+  getTypeIcon(type: string): string {
+    return this.TYPE_CFG[type]?.icon || 'fa-solid fa-building';
   }
 
   getTypeColor(type: string): string {

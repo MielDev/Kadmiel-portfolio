@@ -28,7 +28,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
         </div>
 
         <div *ngIf="tokenInvalid && !loadingToken" class="error-card">
-          <div class="error-icon">🚫</div>
+          <div class="error-icon"><i class="fa-solid fa-ban"></i></div>
           <h2>Lien invalide ou expiré</h2>
           <p>Ce lien unique a déjà été utilisé ou n'est plus valide. Merci de me contacter pour en obtenir un nouveau ou utilisez le lien public.</p>
           <button routerLink="/" class="back-btn">Retour au site</button>
@@ -40,7 +40,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
               <div class="avatar-preview" (click)="photoInput.click()">
                 <img *ngIf="photoPreview" [src]="photoPreview" alt="Preview">
                 <span *ngIf="!photoPreview">{{ getInitials() }}</span>
-                <div class="upload-overlay">📷</div>
+                <div class="upload-overlay"><i class="fa-solid fa-camera"></i></div>
               </div>
               <input #photoInput type="file" (change)="onFileSelected($event)" style="display: none" accept="image/*">
               <p class="hint">Cliquez pour ajouter une photo (optionnel)</p>
@@ -75,7 +75,7 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
         </div>
 
         <div *ngIf="submitted" class="success-card">
-          <div class="success-icon">✨</div>
+          <div class="success-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
           <h2>Merci beaucoup !</h2>
           <p>Votre témoignage a été envoyé avec succès. Il sera visible sur le portfolio après validation.</p>
           <button routerLink="/" class="back-btn">Retour au site</button>
@@ -310,6 +310,8 @@ export class TestimonialFormComponent implements OnInit, AfterViewInit {
     this.token = this.route.snapshot.queryParamMap.get('token');
     if (this.token) {
       this.verifyToken();
+    } else {
+      this.tokenInvalid = true;
     }
   }
 
@@ -385,7 +387,7 @@ export class TestimonialFormComponent implements OnInit, AfterViewInit {
       reader.readAsDataURL(file);
 
       // Upload
-      this.testimonialService.uploadPhoto(file).subscribe({
+      this.testimonialService.uploadPhoto(file, this.token || undefined).subscribe({
         next: (path) => this.formData.photo = path,
         error: (err) => console.error('Upload error', err)
       });

@@ -1,19 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { AdminNavbarComponent } from './admin-navbar';
 
-import { AdminNavbar } from './admin-navbar';
-
-describe('AdminNavbar', () => {
-  let component: AdminNavbar;
-  let fixture: ComponentFixture<AdminNavbar>;
+describe('AdminNavbarComponent', () => {
+  let component: AdminNavbarComponent;
+  let fixture: ComponentFixture<AdminNavbarComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminNavbar],
+      imports: [AdminNavbarComponent],
+      providers: [provideHttpClient(), provideRouter([])],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AdminNavbar);
+    fixture = TestBed.createComponent(AdminNavbarComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
   });
 
   it('should create', () => {

@@ -1,57 +1,90 @@
 import { Routes } from '@angular/router';
-import { PublicLayoutComponent } from './layout/public-layout/public-layout.component';
-import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
-import { PortfolioComponent } from './home/portfolio/portfolio.component';
-import { LoginComponent } from './admin/auth/login/login.component';
-import { DashboardComponent } from './admin/dashboard/dashboard.component';
-import { ProjetsComponent } from './admin/projets/projets.component';
-import { CompetencesComponent } from './admin/competences/competences.component';
-import { AproposComponent } from './admin/apropos/apropos.component';
-import { ExperiencesComponent } from './admin/experiences/experiences.component';
-import { MessagesComponent } from './admin/messages/messages.component';
-import { BlogComponent } from './admin/blog/blog.component';
-import { AnalyticsComponent } from './admin/analytics/analytics.component';
-import { TemoignagesComponent } from './admin/temoignages/temoignages.component';
-import { ParametresComponent } from './admin/parametres/parametres.component';
-import { TestimonialFormComponent } from './components/testimonial-form/testimonial-form';
 import { AuthGuard } from './guards/auth.guard';
-
-import { NiveauxTech } from './admin/niveaux-tech/niveaux-tech';
 
 export const routes: Routes = [
   // Home Routes
   {
     path: '',
-    component: PublicLayoutComponent,
+    loadComponent: () =>
+      import('./layout/public-layout/public-layout.component').then((m) => m.PublicLayoutComponent),
     children: [
-      { path: '', component: PortfolioComponent },
-      { path: 'home', component: PortfolioComponent },
-      { path: 'admin/login', component: LoginComponent },
-      { path: 'testimonial/new', component: TestimonialFormComponent },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      {
+        path: 'home',
+        loadComponent: () => import('./home/portfolio/portfolio.component').then((m) => m.PortfolioComponent),
+      },
+      {
+        path: 'dossier-numerique-cs-sno',
+        loadComponent: () =>
+          import('./home/digital-folder/digital-folder.component').then((m) => m.DigitalFolderComponent),
+      },
+      {
+        path: 'admin/login',
+        loadComponent: () => import('./admin/auth/login/login.component').then((m) => m.LoginComponent),
+      },
+      {
+        path: 'testimonial/new',
+        loadComponent: () =>
+          import('./components/testimonial-form/testimonial-form').then((m) => m.TestimonialFormComponent),
+      },
     ],
   },
 
   // Admin Routes
   {
     path: 'admin',
-    component: AdminLayoutComponent,
+    loadComponent: () =>
+      import('./layout/admin-layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
     canActivate: [AuthGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'projets', component: ProjetsComponent },
-      { path: 'competences', component: CompetencesComponent },
-      { path: 'niveaux-tech', component: NiveauxTech },
-      { path: 'apropos', component: AproposComponent },
-      { path: 'experiences', component: ExperiencesComponent },
-      { path: 'messages', component: MessagesComponent },
-      { path: 'blog', component: BlogComponent },
-      { path: 'analytics', component: AnalyticsComponent },
-      { path: 'temoignages', component: TemoignagesComponent },
-      { path: 'parametres', component: ParametresComponent },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./admin/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+      },
+      {
+        path: 'projets',
+        loadComponent: () => import('./admin/projets/projets.component').then((m) => m.ProjetsComponent),
+      },
+      {
+        path: 'competences',
+        loadComponent: () => import('./admin/competences/competences.component').then((m) => m.CompetencesComponent),
+      },
+      {
+        path: 'niveaux-tech',
+        loadComponent: () => import('./admin/niveaux-tech/niveaux-tech').then((m) => m.NiveauxTech),
+      },
+      {
+        path: 'apropos',
+        loadComponent: () => import('./admin/apropos/apropos.component').then((m) => m.AproposComponent),
+      },
+      {
+        path: 'experiences',
+        loadComponent: () => import('./admin/experiences/experiences.component').then((m) => m.ExperiencesComponent),
+      },
+      {
+        path: 'messages',
+        loadComponent: () => import('./admin/messages/messages.component').then((m) => m.MessagesComponent),
+      },
+      {
+        path: 'blog',
+        loadComponent: () => import('./admin/blog/blog.component').then((m) => m.BlogComponent),
+      },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./admin/analytics/analytics.component').then((m) => m.AnalyticsComponent),
+      },
+      {
+        path: 'temoignages',
+        loadComponent: () => import('./admin/temoignages/temoignages.component').then((m) => m.TemoignagesComponent),
+      },
+      {
+        path: 'parametres',
+        loadComponent: () => import('./admin/parametres/parametres.component').then((m) => m.ParametresComponent),
+      },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
 
   // Fallback
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: 'home' },
 ];

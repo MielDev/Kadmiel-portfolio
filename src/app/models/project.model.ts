@@ -13,6 +13,6 @@ export interface Project {
   year?: string;
   views?: number;
   cat?: string;
-  emoji?: string;
+  icon?: string;
   bg?: string;
 }

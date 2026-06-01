@@ -46,10 +46,10 @@
         <button class="filter-btn" [class.active]="currentCat === 'hard'" (click)="setCat('hard')"><i class="fa-solid fa-bolt"></i> Hard Skills</button>
         <button class="filter-btn" [class.active]="currentCat === 'soft'" (click)="setCat('soft')"><i class="fa-solid fa-brain"></i> Soft Skills</button>
         <select class="sort-select" [(ngModel)]="sortBy" (change)="applyFilters()">
-          <option value="order-asc">Ordre ↑</option>
-          <option value="percent-desc">Niveau ↓</option>
-          <option value="percent-asc">Niveau ↑</option>
-          <option value="name">A → Z</option>
+          <option value="order-asc">Ordre croissant</option>
+          <option value="percent-desc">Niveau décroissant</option>
+          <option value="percent-asc">Niveau croissant</option>
+          <option value="name">A-Z</option>
         </select>
       </div>
       <button class="btn-add" (click)="openModal()"><span><i class="fa-solid fa-plus"></i> Nouvelle compétence</span></button>
@@ -63,7 +63,7 @@
           <div class="section-header">
             <div class="section-header-title">
               <div class="section-header-dot"></div>
-              <i [class]="catEmoji(group.key)"></i> {{ group.key === 'hard' ? 'Hard Skills' : 'Soft Skills' }}
+              <i [class]="catIcon(group.key)"></i> {{ group.key === 'hard' ? 'Hard Skills' : 'Soft Skills' }}
             </div>
             <div class="section-header-line"></div>
             <div class="section-count">{{ group.value.length }}</div>
@@ -175,7 +175,7 @@
         <div class="modal-title-dot"></div>
         <span>{{ editingId ? 'Modifier la compétence' : 'Nouvelle compétence' }}</span>
       </div>
-      <button class="modal-close" (click)="closeModal()">✕</button>
+      <button class="modal-close" (click)="closeModal()"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <div class="form-row">
@@ -234,7 +234,8 @@
     <div class="modal-foot">
       <button class="btn-cancel" (click)="closeModal()">Annuler</button>
       <button class="btn-save" (click)="saveSkill()">
-        <span>{{ editingId ? '✦ Mettre à jour' : '✦ Enregistrer' }}</span>
+        <span *ngIf="editingId"><i class="fa-solid fa-wand-magic-sparkles"></i> Mettre à jour</span>
+        <span *ngIf="!editingId"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</span>
       </button>
     </div>
   </div>

@@ -108,7 +108,16 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;
 .tl-role{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:600;color:var(--violet);margin-bottom:.7rem;}
 .tl-tasks{list-style:none;margin-bottom:.9rem;}
 .tl-tasks li{font-size:.78rem;color:var(--muted2);padding:.2rem 0;display:flex;gap:.45rem;}
-.tl-tasks li::before{content:'▸';color:var(--violet);}
+.tl-tasks li::before{
+  content:'';
+  width:.35rem;
+  height:.35rem;
+  border-right:2px solid var(--violet);
+  border-bottom:2px solid var(--violet);
+  transform:rotate(-45deg);
+  margin-top:.38rem;
+  flex-shrink:0;
+}
 .tl-card-actions{display:flex;gap:.5rem;}
 .tl-btn{font-family:'JetBrains Mono',monospace;font-size:.6rem;padding:.4rem .8rem;border-radius:6px;cursor:pointer;border:1px solid;transition:all .2s;}
 .tl-btn-edit{border-color:var(--violet);color:var(--violet);}

@@ -8,6 +8,14 @@ export interface Setting {
   value: string;
 }
 
+export interface SettingsAssetUpload {
+  url: string;
+  filename: string;
+  originalName: string;
+  mimetype: string;
+  size: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -51,5 +59,16 @@ export class SettingsService {
     // Note: This is not ideal for performance but matches the backend route
     // In a real app, we'd add a bulk update route to the backend
     return forkJoin(requests);
+  }
+
+  uploadSettingsAsset(file: File, type: string): Observable<SettingsAssetUpload> {
+    const formData = new FormData();
+    formData.append('type', type);
+    formData.append('file', file);
+
+    return this.http.post<{ success: boolean; data: SettingsAssetUpload }>(
+      `${this.apiUrl}/assets?type=${encodeURIComponent(type)}`,
+      formData
+    ).pipe(map(res => res.data));
   }
 }

@@ -816,7 +816,6 @@
 .geo-row:last-child { border-bottom: none; }
 .geo-flag-container { width: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .geo-flag-img { width: 20px; height: auto; border-radius: 2px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-.geo-flag-emoji { font-size: 1.1rem; }
 .geo-name { font-size: .8rem; flex: 1; }
 .geo-bar { width: 100px; height: 5px; background: rgba(255, 255, 255, .06); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
 .geo-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--violet), var(--red)); }

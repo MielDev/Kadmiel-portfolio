@@ -22,7 +22,6 @@ export class ProjetsComponent implements OnInit {
   deleteId: number | null = null;
   currentFilter = 'all';
   currentView = 'grid';
-  selectedEmoji = '🚀';
   searchQuery = '';
   loading = false;
 
@@ -172,13 +171,15 @@ export class ProjetsComponent implements OnInit {
       confirmButtonColor: '#7C3AED',
     });
 
-    if (file) {
-      this.fImageFile = file;
+    // Swal2 retourne un FileList pour input:'file', on prend le premier fichier
+    const selectedFile: File | null = file instanceof FileList ? file[0] ?? null : file ?? null;
+    if (selectedFile) {
+      this.fImageFile = selectedFile;
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.fImageUrl = e.target.result;
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(selectedFile);
     }
   }
 
@@ -218,7 +219,7 @@ export class ProjetsComponent implements OnInit {
     if (this.editingId) {
       this.projectService.updateProject(this.editingId, formData).subscribe({
         next: () => {
-          this.showToast('✅ Projet mis à jour avec succès.', 'success');
+          this.showToast('Projet mis à jour avec succès.', 'success');
           this.loadProjects();
           this.closeModal();
         },
@@ -227,7 +228,7 @@ export class ProjetsComponent implements OnInit {
     } else {
       this.projectService.createProject(formData).subscribe({
         next: () => {
-          this.showToast('🚀 Nouveau projet créé !', 'success');
+          this.showToast('Nouveau projet créé !', 'success');
           this.loadProjects();
           this.closeModal();
         },
@@ -254,7 +255,7 @@ export class ProjetsComponent implements OnInit {
     if (this.deleteId) {
       this.projectService.deleteProject(this.deleteId).subscribe({
         next: () => {
-          this.showToast('🗑 Projet supprimé.', 'error');
+          this.showToast('Projet supprimé.', 'info');
           this.loadProjects();
           this.closeDeleteModal();
         },

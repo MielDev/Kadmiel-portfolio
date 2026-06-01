@@ -38,7 +38,14 @@ yarn-error.log
 testem.log
 /typings
 __screenshots__/
+*.log
+*.bak
+start-ng-*.ps1
+start-preview-*.ps1
+/.vercel
 
 # System files
 .DS_Store
 Thumbs.db
+.vercel
+.vercel

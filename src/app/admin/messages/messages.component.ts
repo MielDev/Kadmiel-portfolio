@@ -152,10 +152,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
       next: () => {
         message.status = status;
         this.applyFilter();
-        this.showToast(status === 'read' ? '✓ Marqué comme lu.' : 
-                       status === 'unread' ? '↩ Marqué non lu.' :
-                       status === 'starred' ? '⭐ Ajouté aux favoris.' : 
-                       status === 'archived' ? '📦 Message archivé.' : 'Statut mis à jour.', 'info');
+        this.showToast(status === 'read' ? 'Marqué comme lu.' :
+                       status === 'unread' ? 'Marqué non lu.' :
+                       status === 'starred' ? 'Ajouté aux favoris.' :
+                       status === 'archived' ? 'Message archivé.' : 'Statut mis à jour.', 'info');
       },
       error: () => this.showToast("Erreur lors de la mise à jour", 'error')
     });
@@ -184,7 +184,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.messages = this.messages.filter(m => m.id !== Number(id));
         this.applyFilter();
         this.closeDelete();
-        this.showToast('🗑 Message supprimé.', 'error');
+        this.showToast('Message supprimé.', 'info');
       },
       error: () => this.showToast("Erreur lors de la suppression", 'error')
     });
@@ -210,7 +210,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       });
       this.clearSelection();
       this.applyFilter();
-      this.showToast('✓ Messages marqués comme lus.', 'success');
+      this.showToast('Messages marqués comme lus.', 'success');
     });
   }
 
@@ -222,7 +222,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       this.messages = this.messages.filter(m => !this.checkedMessages.has(m.id));
       this.clearSelection();
       this.applyFilter();
-      this.showToast(`🗑 Messages supprimés.`, 'error');
+      this.showToast(`Messages supprimés.`, 'info');
     });
   }
 
@@ -239,7 +239,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       return;
     }
     // Simulation d'envoi
-    this.showToast(`📨 Réponse envoyée à ${this.selectedMessage?.name || this.viewTarget?.name} !`, 'success');
+    this.showToast(`Réponse envoyée à ${this.selectedMessage?.name || this.viewTarget?.name} !`, 'success');
     this.replyText = '';
   }
 

@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, ElementRef, ViewChild, HostListener, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
 interface Particle {
@@ -30,6 +30,7 @@ export class LoginComponent implements AfterViewInit {
   error: string | null = null;
   pwdVisible = false;
   remembered = false;
+  private returnUrl = '/admin/dashboard';
 
   // Cursor logic
   mx = 0; my = 0; rx = 0; ry = 0;
@@ -41,8 +42,10 @@ export class LoginComponent implements AfterViewInit {
   constructor(
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/admin/dashboard';
     if (isPlatformBrowser(this.platformId)) {
       this.isMobile = window.matchMedia('(hover:none)').matches;
     }
@@ -134,7 +137,7 @@ export class LoginComponent implements AfterViewInit {
         this.isSubmitting = false;
         // Redirection après succès avec délai pour l'animation
         setTimeout(() => {
-          this.router.navigateByUrl('/admin/dashboard');
+          this.router.navigateByUrl(this.returnUrl);
         }, 1200);
       },
       error: (err) => {

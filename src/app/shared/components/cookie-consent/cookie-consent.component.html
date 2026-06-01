@@ -1,7 +1,7 @@
 <div class="cookie-banner" *ngIf="showBanner">
   <div class="cookie-content">
     <div class="cookie-header">
-      <span class="cookie-icon">🍪</span>
+      <span class="cookie-icon"><i class="fa-solid fa-cookie-bite"></i></span>
       <h3>Respect de votre vie privée</h3>
     </div>
     
@@ -11,7 +11,7 @@
 
     <div class="cookie-details-toggle" (click)="isExpanded = !isExpanded">
       <span>{{ isExpanded ? 'Masquer les détails' : 'Voir les détails de ce que nous suivons' }}</span>
-      <span class="toggle-icon" [class.rotated]="isExpanded">▼</span>
+      <span class="toggle-icon" [class.rotated]="isExpanded"><i class="fa-solid fa-chevron-down"></i></span>
     </div>
 
     <div class="cookie-details-content" [class.expanded]="isExpanded">

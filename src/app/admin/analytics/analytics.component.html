@@ -16,7 +16,7 @@
     </div>
 
     <div class="error-state" *ngIf="!isLoading && errorMessage">
-      <div class="error-icon">⚠️</div>
+      <div class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
       <p>{{ errorMessage }}</p>
       <button class="btn-retry" (click)="loadData()">Réessayer</button>
     </div>
@@ -49,12 +49,12 @@
              [style.--kpi-icon-bg]="stat.color + '1A'"
              [style.--kpi-icon-border]="stat.color + '33'">
           <div class="kpi-card-border"></div>
-          <div class="kpi-icon">{{ stat.icon }}</div>
+          <div class="kpi-icon"><i [class]="stat.icon"></i></div>
           <div class="kpi-label">{{ stat.label }}</div>
           <div class="kpi-value">{{ stat.value }}</div>
           <div class="kpi-trend">
             <span class="kpi-trend-val" [ngClass]="stat.trendUp ? 'trend-up' : 'trend-down'">
-              {{ stat.trendUp ? '↑' : '↓' }} {{ stat.trend }}
+              <i [class]="stat.trendUp ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'"></i> {{ stat.trend }}
             </span>
             <span class="kpi-period">vs période préc.</span>
           </div>
@@ -92,7 +92,7 @@
 
         <div class="realtime-panel">
           <div class="rt-head">
-            <div class="rt-title">⚡ Temps réel</div>
+            <div class="rt-title"><i class="fa-solid fa-bolt"></i> Temps réel</div>
             <div class="rt-live">
               <div class="rt-live-dot"></div>En direct
             </div>
@@ -153,7 +153,7 @@
             <div *ngFor="let geo of geoStats" class="geo-row">
               <span class="geo-flag-container">
                 <img *ngIf="geo.flagUrl" [src]="geo.flagUrl" class="geo-flag-img" [alt]="geo.name">
-                <span *ngIf="!geo.flagUrl" class="geo-flag-emoji">{{ geo.flag }}</span>
+                <i *ngIf="!geo.flagUrl" [class]="geo.flag"></i>
               </span>
               <span class="geo-name">{{ geo.name }}</span>
               <div class="geo-bar">
@@ -172,7 +172,7 @@
           </div>
           <div class="panel-body">
             <div *ngFor="let device of deviceStats" class="device-row">
-              <div class="device-icon">{{ device.icon }}</div>
+              <div class="device-icon"><i [class]="device.icon"></i></div>
               <span class="device-name">{{ device.name }}</span>
               <div class="device-bar">
                 <div class="device-bar-fill" [style.width]="device.pct + '%'" [style.background]="device.color"></div>
@@ -182,7 +182,7 @@
             <div class="device-separator"></div>
             <div class="browser-grid">
               <div *ngFor="let browser of browserStats" class="browser-item">
-                <span class="browser-icon">{{ browser.icon }}</span>
+                <span class="browser-icon"><i [class]="browser.icon"></i></span>
                 <span class="browser-name">{{ browser.name }}</span>
                 <span class="browser-pct">{{ browser.pct }}%</span>
               </div>
@@ -216,7 +216,7 @@
                 <td class="td-path">{{ page.path }}</td>
                 <td class="td-val">{{ page.views | number }}</td>
                 <td class="td-trend" [ngClass]="page.trendUp ? 'change-up' : 'change-down'">
-                  {{ page.trendUp ? '↑' : '↓' }} {{ page.trend }}
+                  <i [class]="page.trendUp ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'"></i> {{ page.trend }}
                 </td>
                 <td class="td-bar">
                   <div class="page-mini-bar-wrap">
@@ -255,7 +255,7 @@
                       {{ (overview?.bounceRate || 0) < 50 ? 'Excellent' : 'À surveiller' }}
                     </span>
                     <span *ngIf="overview?.bounceRateTrend" class="gauge-trend" [ngClass]="overview?.bounceRateTrendUp ? 'trend-bad' : 'trend-good'">
-                      {{ overview?.bounceRateTrendUp ? '↑' : '↓' }} {{ overview?.bounceRateTrend }}
+                      <i [class]="overview?.bounceRateTrendUp ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'"></i> {{ overview?.bounceRateTrend }}
                     </span>
                   </div>
                   <span class="gauge-sub">Référence : 40-55%</span>
@@ -277,7 +277,7 @@
                          [src]="'https://flagcdn.com/w20/' + code.toLowerCase() + '.png'" 
                          class="event-flag-img" 
                          [alt]="event.country">
-                    <span *ngIf="!getCountryCode(event.country)">{{ event.icon }}</span>
+                    <i *ngIf="!getCountryCode(event.country)" [class]="event.icon"></i>
                   </div>
                   <div class="event-content">
                     <div class="event-text">{{ event.text }}</div>

@@ -6,8 +6,6 @@ import {
   ElementRef, 
   Renderer2, 
   HostListener, 
-  Inject, 
-  PLATFORM_ID,
   ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -17,20 +15,15 @@ import { Title, Meta } from '@angular/platform-browser';
 import { ProjectService } from '../../services/project.service';
 import { SkillService } from '../../services/skill.service';
 import { ExperienceService } from '../../services/experience.service';
-import { TestimonialService } from '../../services/testimonial.service';
-import { BlogService } from '../../services/blog.service';
 import { AboutService, About } from '../../services/about.service';
 import { HeroService } from '../../services/hero.service';
 import { MessageService } from '../../services/message.service';
 import { TechnicalLevelService } from '../../services/technical-level.service';
-import { AvailabilityService, Availability } from '../../services/availability.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { SettingsService } from '../../services/settings.service';
 import { Project } from '../../models/project.model';
 import { Skill } from '../../models/skill.model';
 import { Experience } from '../../models/experience.model';
-import { Testimonial } from '../../models/testimonial.model';
-import { Blog } from '../../models/blog.model';
 import { TechnicalLevel } from '../../models/technical-level.model';
 import { HeroData } from '../../models/hero.model';
 import { environment } from '../../../environments/environment';
@@ -43,9 +36,7 @@ import { environment } from '../../../environments/environment';
   styleUrl: './portfolio.component.css'
 })
 export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
-
   private unlisteners: (() => void)[] = [];
-  private animTrailId?: number;
   private trackedSections = new Set<string>();
   private maxScrollDepth = 0;
   private observer?: IntersectionObserver;
@@ -54,13 +45,122 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   projects: Project[] = [];
   skills: Skill[] = [];
   experiences: Experience[] = [];
-  testimonials: Testimonial[] = [];
-  blogs: Blog[] = [];
   technicalLevels: TechnicalLevel[] = [];
   aboutData: About | null = null;
   heroData: HeroData | null = null;
-  availabilityData: Availability | null = null;
   currentYear = new Date().getFullYear();
+
+  // Loading states
+  isLoadingProjects = true;
+  isLoadingSkills = true;
+
+  // Project filtering
+  selectedTag = 'Tous';
+  showBackToTop = false;
+
+  // ── Theme system ──────────────────────────────────────────────
+  isDark = true;
+  showThemePanel = false;
+  selectedPaletteIndex = 0;
+
+  readonly palettes = [
+    { name: 'Cyber',    primary: '#FF3B3B', secondary: '#7C3AED', icon: '🔴' },
+    { name: 'Ocean',    primary: '#06B6D4', secondary: '#6366F1', icon: '🔵' },
+    { name: 'Emerald',  primary: '#10B981', secondary: '#3B82F6', icon: '🟢' },
+    { name: 'Sunset',   primary: '#F97316', secondary: '#EC4899', icon: '🟠' },
+    { name: 'Gold',     primary: '#F59E0B', secondary: '#8B5CF6', icon: '🟡' },
+  ];
+
+  private darkVars = {
+    '--bg': '#070B14',
+    '--card-bg': '#0F172A',
+    '--card-bg-2': '#1e293b',
+    '--card-bg-3': '#090D1A',
+    '--nav-bg': 'rgba(7,11,20,0.88)',
+    '--text': '#FFFFFF',
+    '--text-muted': '#9CA3AF',
+    '--text-dim': '#6B7280',
+    '--border': 'rgba(255,255,255,0.06)',
+    '--border-md': 'rgba(255,255,255,0.08)',
+    '--border-light': 'rgba(255,255,255,0.12)',
+    '--mobile-menu-bg': 'rgba(7,11,20,0.97)',
+    '--input-bg': '#0F172A',
+    '--shadow-color': 'rgba(0,0,0,0.4)',
+  };
+
+  private lightVars = {
+    '--bg': '#F8FAFC',
+    '--card-bg': '#FFFFFF',
+    '--card-bg-2': '#E2E8F0',
+    '--card-bg-3': '#F1F5F9',
+    '--nav-bg': 'rgba(248,250,252,0.92)',
+    '--text': '#0F172A',
+    '--text-muted': '#475569',
+    '--text-dim': '#64748B',
+    '--border': 'rgba(0,0,0,0.07)',
+    '--border-md': 'rgba(0,0,0,0.1)',
+    '--border-light': 'rgba(0,0,0,0.15)',
+    '--mobile-menu-bg': 'rgba(248,250,252,0.98)',
+    '--input-bg': '#F8FAFC',
+    '--shadow-color': 'rgba(0,0,0,0.1)',
+  };
+
+  toggleDark(): void {
+    this.isDark = !this.isDark;
+    this.applyTheme();
+  }
+
+  selectPalette(index: number): void {
+    this.selectedPaletteIndex = index;
+    this.applyTheme();
+  }
+
+  toggleThemePanel(): void {
+    this.showThemePanel = !this.showThemePanel;
+  }
+
+  applyTheme(): void {
+    const root = document.documentElement;
+    const modeVars = this.isDark ? this.darkVars : this.lightVars;
+    const palette = this.palettes[this.selectedPaletteIndex];
+
+    Object.entries(modeVars).forEach(([k, v]) => root.style.setProperty(k, v));
+    root.style.setProperty('--red', palette.primary);
+    root.style.setProperty('--violet', palette.secondary);
+    root.setAttribute('data-theme', this.isDark ? 'dark' : 'light');
+
+    // Persist
+    localStorage.setItem('kt-theme-dark', String(this.isDark));
+    localStorage.setItem('kt-theme-palette', String(this.selectedPaletteIndex));
+  }
+
+  private loadSavedTheme(): void {
+    const savedDark = localStorage.getItem('kt-theme-dark');
+    const savedPalette = localStorage.getItem('kt-theme-palette');
+    if (savedDark !== null) this.isDark = savedDark === 'true';
+    if (savedPalette !== null) this.selectedPaletteIndex = parseInt(savedPalette, 10) || 0;
+    this.applyTheme();
+  }
+  // ─────────────────────────────────────────────────────────────
+
+  get uniqueProjectTags(): string[] {
+    const tags = new Set<string>();
+    this.projects.forEach(p => (p.tags || []).forEach(t => tags.add(t)));
+    return ['Tous', ...Array.from(tags)];
+  }
+
+  get filteredProjects(): Project[] {
+    if (this.selectedTag === 'Tous') return this.projects;
+    return this.projects.filter(p => (p.tags || []).includes(this.selectedTag));
+  }
+
+  selectTag(tag: string): void {
+    this.selectedTag = tag;
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   settings: any = {
     display: {
       customCursor: true,
@@ -71,6 +171,9 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     branding: {
       logoType: 'text',
       logoText: 'KT.',
+      logoImage: null,
+      favicon: null,
+      siteIcon: null,
       fullName: 'Kadmiel TOGNON',
       footerRights: 'Tous droits réservés.',
       location: 'Le Mans, France'
@@ -85,6 +188,14 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     typography: {
       titleFont: 'orbitron',
       bodyFont: 'syne'
+    },
+    seo: {
+      title: '',
+      description: '',
+      keywords: '',
+      ogTitle: '',
+      ogImage: '',
+      url: ''
     },
     social: {
       linkedin: '',
@@ -114,19 +225,17 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     private projectService: ProjectService,
     private skillService: SkillService,
     private experienceService: ExperienceService,
-    private testimonialService: TestimonialService,
-    private blogService: BlogService,
     private aboutService: AboutService,
     private heroService: HeroService,
     private messageService: MessageService,
     private technicalLevelService: TechnicalLevelService,
-    private availabilityService: AvailabilityService,
     private analyticsService: AnalyticsService,
     private settingsService: SettingsService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.loadSavedTheme();
     this.loadData();
     this.loadSettings();
     this.analyticsService.track('pageview').subscribe();
@@ -144,7 +253,7 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
           hero: { ...this.settings['hero'], ...(data?.['hero'] || {}) },
           colors: { ...this.settings['colors'], ...(data?.['colors'] || {}) },
           typography: { ...this.settings['typography'], ...(data?.['typography'] || {}) },
-          seo: { ...(data?.['seo'] || {}) },
+          seo: { ...this.settings['seo'], ...(data?.['seo'] || {}) },
           social: { ...this.settings['social'], ...(data?.['social'] || {}) }
         };
         this.applySettings();
@@ -170,41 +279,243 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
       if (seo.keywords) this.metaService.updateTag({ name: 'keywords', content: seo.keywords });
       if (seo.ogTitle) this.metaService.updateTag({ property: 'og:title', content: seo.ogTitle });
       if (seo.url) this.metaService.updateTag({ property: 'og:url', content: seo.url });
+      if (seo.ogImage) {
+        const ogImage = this.resolveSettingsAssetUrl(seo.ogImage);
+        this.metaService.updateTag({ property: 'og:image', content: ogImage });
+        this.metaService.updateTag({ name: 'twitter:image', content: ogImage });
+      }
     }
 
-    // Apply Colors
+    const branding = this.settings['branding'];
+    this.applyFavicon(branding?.favicon || branding?.siteIcon || branding?.logoImage);
+
+    // ── Synchroniser le mode dark/light depuis les paramètres admin ──────────
+    // L'admin est "maître" : si display.darkMode est défini en DB, c'est lui
+    // qui définit le mode par défaut du site. Le visiteur peut toujours
+    // basculer localement, mais ce flag remet à zéro à chaque chargement.
+    const display = this.settings['display'];
+    if (display && display.darkMode !== undefined) {
+      this.isDark = !!display.darkMode;
+    }
+
+    // ── Couleurs d'accent depuis l'admin ──────────────────────────────────────
+    // On met à jour la palette courante avec les couleurs définies en back-office
+    // (primary = --red, secondary = --violet). Les vars bg/text sont appliquées
+    // ensuite par applyTheme() selon le mode dark/light.
     const colors = this.settings['colors'];
     if (colors) {
-      const root = document.documentElement;
-      if (colors.bg) root.style.setProperty('--bg', colors.bg);
-      if (colors.primary) root.style.setProperty('--red', colors.primary);
-      if (colors.secondary) root.style.setProperty('--violet', colors.secondary);
-      if (colors.text) root.style.setProperty('--text', colors.text);
+      const palette = this.palettes[this.selectedPaletteIndex];
+      if (colors.primary) palette.primary = colors.primary;
+      if (colors.secondary) palette.secondary = colors.secondary;
     }
 
-    // Apply Fonts
+    // ── Fonts ────────────────────────────────────────────────────────────────
     const typography = this.settings['typography'];
     if (typography) {
       const root = document.documentElement;
       if (typography.titleFont) {
-        const font = typography.titleFont === 'orbitron' ? "'Orbitron', sans-serif" : 
+        const font = typography.titleFont === 'orbitron' ? "'Orbitron', sans-serif" :
                     typography.titleFont === 'space' ? "'Space Mono', monospace" :
-                    typography.titleFont === 'rajdhani' ? "'Rajdhani', sans-serif" : 
+                    typography.titleFont === 'rajdhani' ? "'Rajdhani', sans-serif" :
                     "'Orbitron', sans-serif";
         root.style.setProperty('--font-title', font);
       }
       if (typography.bodyFont) {
-        const font = typography.bodyFont === 'syne' ? "'Syne', sans-serif" : 
+        const font = typography.bodyFont === 'syne' ? "'Syne', sans-serif" :
                     typography.bodyFont === 'inter' ? "'Inter', sans-serif" :
-                    typography.bodyFont === 'manrope' ? "'Manrope', sans-serif" : 
+                    typography.bodyFont === 'manrope' ? "'Manrope', sans-serif" :
                     "'Syne', sans-serif";
         root.style.setProperty('--font-body', font);
       }
+      if (typography.lineHeight) {
+        const lh = parseFloat(typography.lineHeight);
+        if (!isNaN(lh)) root.style.setProperty('--line-height', String(lh));
+      }
     }
+
+    // ── Appliquer le thème complet (dark/light vars + accent colors) ──────────
+    // Doit être appelé EN DERNIER pour que tout soit cohérent.
+    this.applyTheme();
+  }
+
+  getBrandingAssetUrl(value: string | null | undefined): string {
+    return this.resolveSettingsAssetUrl(value);
+  }
+
+  private resolveSettingsAssetUrl(value: string | null | undefined): string {
+    if (!value) return '';
+    if (value.startsWith('data:') || value.startsWith('blob:') || value.startsWith('http')) return value;
+
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    return `${baseUrl}${value.startsWith('/') ? '' : '/'}${value}`;
+  }
+
+  private faviconRenderToken = 0;
+
+  private applyFavicon(value: string | null | undefined): void {
+    if (!value || typeof document === 'undefined') return;
+
+    const href = this.resolveSettingsAssetUrl(value);
+    const token = ++this.faviconRenderToken;
+
+    this.setFaviconLinks(href, this.getIconMimeType(href));
+    this.createReadableFavicon(href).then((readableHref) => {
+      if (token === this.faviconRenderToken) {
+        this.setFaviconLinks(readableHref, 'image/png');
+      }
+    }).catch(() => {
+      if (token === this.faviconRenderToken) {
+        this.setFaviconLinks(href, this.getIconMimeType(href));
+      }
+    });
+  }
+
+  private setFaviconLinks(href: string, type: string): void {
+    if (typeof document === 'undefined') return;
+
+    this.upsertIconLink('icon', href, type);
+    this.upsertIconLink('shortcut icon', href, type);
+    this.upsertIconLink('icon', href, type, '32x32');
+    this.upsertIconLink('icon', href, type, '48x48');
+    this.upsertIconLink('icon', href, type, '96x96');
+    this.upsertIconLink('apple-touch-icon', href, type, '180x180');
+  }
+
+  private upsertIconLink(rel: string, href: string, type: string, sizes?: string): void {
+    const selector = sizes
+      ? `link[rel="${rel}"][sizes="${sizes}"]`
+      : `link[rel="${rel}"]:not([sizes])`;
+    let link = document.querySelector<HTMLLinkElement>(selector);
+
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = rel;
+      document.head.appendChild(link);
+    }
+
+    if (sizes) {
+      link.sizes = sizes;
+    } else {
+      link.removeAttribute('sizes');
+    }
+
+    link.type = type;
+    link.href = href;
+  }
+
+  private async createReadableFavicon(href: string): Promise<string> {
+    if (
+      typeof window === 'undefined' ||
+      typeof Image === 'undefined' ||
+      typeof document === 'undefined'
+    ) {
+      return href;
+    }
+
+    const image = await this.loadImageForCanvas(href);
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+    if (!sourceWidth || !sourceHeight) return href;
+
+    const sourceCanvas = document.createElement('canvas');
+    sourceCanvas.width = sourceWidth;
+    sourceCanvas.height = sourceHeight;
+    const sourceCtx = sourceCanvas.getContext('2d', { willReadFrequently: true });
+    if (!sourceCtx) return href;
+
+    sourceCtx.drawImage(image, 0, 0, sourceWidth, sourceHeight);
+    const crop = this.findVisibleImageBounds(sourceCtx, sourceWidth, sourceHeight);
+    const size = 192;
+    const padding = 10;
+    const drawable = size - padding * 2;
+    const scale = Math.min(drawable / crop.width, drawable / crop.height);
+    const drawWidth = Math.max(1, Math.round(crop.width * scale));
+    const drawHeight = Math.max(1, Math.round(crop.height * scale));
+    const drawX = Math.round((size - drawWidth) / 2);
+    const drawY = Math.round((size - drawHeight) / 2);
+
+    const outputCanvas = document.createElement('canvas');
+    outputCanvas.width = size;
+    outputCanvas.height = size;
+    const outputCtx = outputCanvas.getContext('2d');
+    if (!outputCtx) return href;
+
+    outputCtx.clearRect(0, 0, size, size);
+    outputCtx.imageSmoothingEnabled = true;
+    outputCtx.imageSmoothingQuality = 'high';
+    outputCtx.drawImage(
+      sourceCanvas,
+      crop.x,
+      crop.y,
+      crop.width,
+      crop.height,
+      drawX,
+      drawY,
+      drawWidth,
+      drawHeight
+    );
+
+    return outputCanvas.toDataURL('image/png');
+  }
+
+  private loadImageForCanvas(href: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.crossOrigin = 'anonymous';
+      image.onload = () => resolve(image);
+      image.onerror = () => reject(new Error('Unable to load favicon image.'));
+      image.src = href;
+    });
+  }
+
+  private findVisibleImageBounds(
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number
+  ): { x: number; y: number; width: number; height: number } {
+    const imageData = ctx.getImageData(0, 0, width, height).data;
+    let minX = width;
+    let minY = height;
+    let maxX = -1;
+    let maxY = -1;
+
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const alpha = imageData[(y * width + x) * 4 + 3];
+        if (alpha > 12) {
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+
+    if (maxX < minX || maxY < minY) {
+      return { x: 0, y: 0, width, height };
+    }
+
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX + 1,
+      height: maxY - minY + 1,
+    };
+  }
+
+  private getIconMimeType(href: string): string {
+    const normalized = href.split('?')[0].toLowerCase();
+    if (normalized.endsWith('.svg')) return 'image/svg+xml';
+    if (normalized.endsWith('.png')) return 'image/png';
+    if (normalized.endsWith('.jpg') || normalized.endsWith('.jpeg')) return 'image/jpeg';
+    if (normalized.endsWith('.webp')) return 'image/webp';
+    if (normalized.endsWith('.gif')) return 'image/gif';
+    if (normalized.endsWith('.ico')) return 'image/x-icon';
+    return 'image/*';
   }
 
   ngAfterViewInit(): void {
-    this.initCursor();
+    this.initSmoothHashNavigation();
     this.initScrollProgress();
     this.initRevealOnScroll(); // On initialise l'observer immédiatement
     setTimeout(() => {
@@ -215,42 +526,65 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadData(): void {
-    this.projectService.getProjects().subscribe(data => {
-      this.projects = Array.isArray(data) ? data : [];
-      this.refreshReveals();
+    this.projectService.getProjects().subscribe({
+      next: data => {
+        this.projects = Array.isArray(data) ? data : [];
+        this.isLoadingProjects = false;
+        this.refreshReveals();
+      },
+      error: err => { this.isLoadingProjects = false; this.handleSectionLoadError('projects', err); },
     });
-    this.skillService.getSkills().subscribe(data => {
-      this.skills = Array.isArray(data) ? data : [];
-      this.refreshReveals();
+    this.skillService.getSkills().subscribe({
+      next: data => {
+        this.skills = Array.isArray(data) ? data : [];
+        this.isLoadingSkills = false;
+        this.refreshReveals();
+      },
+      error: err => { this.isLoadingSkills = false; this.handleSectionLoadError('skills', err); },
     });
-    this.technicalLevelService.getTechnicalLevels().subscribe(data => {
-      this.technicalLevels = Array.isArray(data) ? data : [];
-      this.refreshReveals();
+    this.technicalLevelService.getTechnicalLevels().subscribe({
+      next: data => {
+        this.technicalLevels = Array.isArray(data) ? data : [];
+        this.refreshReveals();
+      },
+      error: err => this.handleSectionLoadError('technical-levels', err),
     });
-    this.experienceService.getExperiences().subscribe(data => {
-      this.experiences = Array.isArray(data) ? data : [];
-      this.refreshReveals();
+    this.experienceService.getExperiences().subscribe({
+      next: data => {
+        this.experiences = Array.isArray(data) ? data.map(exp => this.normalizeExperience(exp)) : [];
+        this.refreshReveals();
+      },
+      error: err => this.handleSectionLoadError('experiences', err),
     });
-    this.testimonialService.getTestimonials().subscribe(data => {
-      this.testimonials = Array.isArray(data) ? data : [];
-      this.refreshReveals();
+    this.aboutService.getAbout().subscribe({
+      next: data => {
+        this.aboutData = data;
+        this.refreshReveals();
+      },
+      error: err => this.handleSectionLoadError('about', err),
     });
-    this.blogService.getBlogs().subscribe(data => {
-      this.blogs = Array.isArray(data) ? data : [];
-      this.refreshReveals();
+    this.heroService.getHero().subscribe({
+      next: data => {
+        this.heroData = data;
+        this.refreshReveals();
+      },
+      error: err => this.handleSectionLoadError('hero', err),
     });
-    this.aboutService.getAbout().subscribe(data => {
-      this.aboutData = data;
-      this.refreshReveals();
-    });
-    this.heroService.getHero().subscribe(data => {
-      this.heroData = data;
-      this.refreshReveals();
-    });
-    this.availabilityService.getAvailability().subscribe(data => {
-      this.availabilityData = data;
-      this.refreshReveals();
-    });
+  }
+
+  private normalizeExperience(exp: Experience): Experience {
+    return {
+      ...exp,
+      description: Array.isArray(exp.description) ? exp.description : [],
+      end_date: exp.end_date || null,
+      current: Number(exp.current) || 0,
+      digital_folder_url: exp.digital_folder_url || null,
+    };
+  }
+
+  private handleSectionLoadError(section: string, error: unknown): void {
+    console.error(`Error loading ${section}:`, error);
+    this.refreshReveals();
   }
 
   /* ─── UTILS ─── */
@@ -273,23 +607,10 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.getPhotoUrl(image);
   }
 
-  getInitials(name: string): string {
-    if (!name) return '??';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-  }
-
-  getPrimaryCtaHref(): string {
-    const t = (this.availabilityData?.primary_cta_type || '').toLowerCase().trim();
-    if (t === 'projects') return '#projects';
-    if (t === 'contact') return '#contact';
-    if (t === 'cv') return this.heroData?.cv || '#';
-    return '#';
-  }
-
-  shouldDownload(url: string | null | undefined): boolean {
-    if (!url) return false;
-    const u = url.toLowerCase();
-    return u.endsWith('.pdf') || u.includes('/uploads/');
+  isDigitalFolderFormation(exp: Experience): boolean {
+    const text = `${exp.title || ''} ${(exp.description || []).join(' ')}`.toLowerCase();
+    const normalized = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return normalized.includes('services numeriques aux organisations');
   }
 
   onSubmitContact(): void {
@@ -321,7 +642,6 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.animTrailId) cancelAnimationFrame(this.animTrailId);
     this.unlisteners.forEach(fn => fn());
     this.observer?.disconnect();
   }
@@ -331,6 +651,17 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateScrollProgress();
     this.updateNavActiveLink();
     this.trackScrollDepth();
+    this.showBackToTop = window.scrollY > 400;
+    if (this.showThemePanel) this.showThemePanel = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent) {
+    const panel = document.querySelector('.theme-panel');
+    const trigger = document.querySelector('.theme-trigger');
+    if (this.showThemePanel && panel && !panel.contains(e.target as Node) && !trigger?.contains(e.target as Node)) {
+      this.showThemePanel = false;
+    }
   }
 
   private trackScrollDepth(): void {
@@ -347,61 +678,6 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
         this.maxScrollDepth = threshold;
         this.analyticsService.track('scroll_depth', { path: `/${threshold}%` }).subscribe();
       }
-    }
-  }
-
-  private initCursor(): void {
-    const cursor = this.el.nativeElement.querySelector('#cursor');
-    const trail = this.el.nativeElement.querySelector('#cursorTrail');
-    
-    // Safety check: if elements are not in DOM, don't proceed
-    if (!cursor || !trail) {
-      console.warn('Cursor elements not found in DOM. Skipping initCursor.');
-      return;
-    }
-
-    const isTouchDevice = () => window.matchMedia('(hover: none)').matches;
-
-    if (isTouchDevice()) {
-      this.renderer.setStyle(cursor, 'display', 'none');
-      this.renderer.setStyle(trail, 'display', 'none');
-      this.renderer.setStyle(document.body, 'cursor', 'auto');
-      this.el.nativeElement.querySelectorAll('*').forEach((el: HTMLElement) => this.renderer.setStyle(el, 'cursor', ''));
-    } else {
-      let mx = 0, my = 0, tx = 0, ty = 0;
-      let isHover = false;
-
-      const mouseMoveListener = this.renderer.listen('document', 'mousemove', (e: MouseEvent) => {
-        mx = e.clientX; my = e.clientY;
-        this.renderer.setStyle(cursor, 'transform', `translate(${mx - 6}px, ${my - 6}px) scale(${isHover ? 1.8 : 1})`);
-      });
-      this.unlisteners.push(mouseMoveListener);
-
-      const animTrail = () => {
-        tx += (mx - tx) * 0.12;
-        ty += (my - ty) * 0.12;
-        this.renderer.setStyle(trail, 'transform', `translate(${tx - 16}px, ${ty - 16}px)`);
-        this.animTrailId = requestAnimationFrame(animTrail);
-      };
-      animTrail();
-
-      this.el.nativeElement.querySelectorAll('a, button, .btn, .skill-card, .project-card, .contact-item').forEach((el: HTMLElement) => {
-        const mouseEnterListener = this.renderer.listen(el, 'mouseenter', () => {
-          isHover = true;
-          this.renderer.setStyle(cursor, 'transform', `translate(${mx - 6}px, ${my - 6}px) scale(1.8)`);
-          this.renderer.setStyle(trail, 'width', '48px');
-          this.renderer.setStyle(trail, 'height', '48px');
-          this.renderer.setStyle(trail, 'borderColor', 'var(--red)');
-        });
-        const mouseLeaveListener = this.renderer.listen(el, 'mouseleave', () => {
-          isHover = false;
-          this.renderer.setStyle(cursor, 'transform', `translate(${mx - 6}px, ${my - 6}px) scale(1)`);
-          this.renderer.setStyle(trail, 'width', '32px');
-          this.renderer.setStyle(trail, 'height', '32px');
-          this.renderer.setStyle(trail, 'borderColor', 'rgba(255,255,255,0.15)');
-        });
-        this.unlisteners.push(mouseEnterListener, mouseLeaveListener);
-      });
     }
   }
 
@@ -520,12 +796,45 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     let current = '';
     sections.forEach((s: HTMLElement) => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
     navLinks.forEach((a: HTMLElement) => {
-      this.renderer.setStyle(a, 'color', a.getAttribute('href') === '#' + current ? 'var(--text-main)' : '');
+      const isActive = a.getAttribute('href') === '#' + current;
+      if (isActive) {
+        this.renderer.addClass(a, 'nav-active');
+      } else {
+        this.renderer.removeClass(a, 'nav-active');
+      }
     });
   }
 
   private initNavActiveLinkHighlight(): void {
     this.updateNavActiveLink();
+  }
+
+  /**
+   * Intercepte tous les clics sur les liens d'ancre (#section) dans ce composant
+   * et fait un scrollIntoView fluide — sans passer par le router Angular,
+   * ce qui évitait le rechargement de page.
+   */
+  private initSmoothHashNavigation(): void {
+    const clickListener = this.renderer.listen(
+      this.el.nativeElement,
+      'click',
+      (event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+        const anchor = target.closest('a') as HTMLAnchorElement | null;
+        if (!anchor) return;
+
+        const href = anchor.getAttribute('href');
+        if (href && href.startsWith('#') && href.length > 1) {
+          event.preventDefault();
+          const sectionId = href.slice(1);
+          const element = document.getElementById(sectionId);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      }
+    );
+    this.unlisteners.push(clickListener);
   }
 
   incrementViewCount(id: number): void {
