@@ -62,6 +62,8 @@ export class AnalyticsService {
   private readonly browsersUrl = `${environment.apiUrl}/analytics/browsers`;
   private readonly topPagesUrl = `${environment.apiUrl}/analytics/top-pages`;
   private readonly eventsUrl = `${environment.apiUrl}/analytics/recent-events`;
+  private readonly realtimeUrl = `${environment.apiUrl}/analytics/realtime`;
+  private readonly hourlyUrl = `${environment.apiUrl}/analytics/hourly`;
 
   private lastTrackedEvent: { type: string; path: string; time: number } | null = null;
   private consentSubject: BehaviorSubject<boolean | null>;
@@ -260,11 +262,32 @@ export class AnalyticsService {
     );
   }
 
-  getRecentEvents(): Observable<any[]> {
-    return this.http.get<ApiResponse<any[]>>(this.eventsUrl).pipe(
+  getRecentEvents(limit = 20): Observable<any[]> {
+    return this.http.get<ApiResponse<any[]>>(`${this.eventsUrl}?limit=${limit}`).pipe(
       map((response) => (response.success ? response.data : [])),
       catchError((error) => {
         this.logAnalyticsError('Failed to fetch recent events', error);
+        return of([]);
+      })
+    );
+  }
+
+  getRealtime(minutes = 5): Observable<any> {
+    return this.http.get<ApiResponse<any>>(`${this.realtimeUrl}?minutes=${minutes}`).pipe(
+      map((response) => (response.success ? response.data : { activeVisitors: 0, pages: [] })),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch realtime stats', error);
+        return of({ activeVisitors: 0, pages: [] });
+      })
+    );
+  }
+
+  getHourlyStats(range?: string): Observable<any[]> {
+    const url = range ? `${this.hourlyUrl}?range=${range}` : this.hourlyUrl;
+    return this.http.get<ApiResponse<any[]>>(url).pipe(
+      map((response) => (response.success ? response.data : [])),
+      catchError((error) => {
+        this.logAnalyticsError('Failed to fetch hourly stats', error);
         return of([]);
       })
     );

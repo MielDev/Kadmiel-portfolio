@@ -105,6 +105,7 @@
               <span class="rt-page-path">{{ page.path }}</span>
               <span class="rt-page-count">{{ page.count }}</span>
             </div>
+            <div *ngIf="realtimePages.length === 0" class="empty-inline">Aucune page active sur les 5 dernières minutes.</div>
           </div>
           <div style="margin-top:1.1rem;">
             <canvas #rtChart style="width:100%;height:60px;"></canvas>
@@ -139,6 +140,7 @@
                   <span class="leg-name">{{ s.source || 'Direct' }}</span>
                   <span class="leg-pct">{{ getSourcePct(s.count) }}%</span>
                 </div>
+                <div *ngIf="sources.length === 0" class="empty-inline">Aucune source détectée.</div>
               </div>
             </div>
           </div>
@@ -162,6 +164,7 @@
               <span class="geo-pct">{{ geo.pct }}%</span>
               <span class="geo-count">{{ geo.count | number }}</span>
             </div>
+            <div *ngIf="geoStats.length === 0" class="empty-inline">Aucune donnée géographique.</div>
           </div>
         </div>
 
@@ -179,6 +182,7 @@
               </div>
               <span class="device-pct">{{ device.pct }}%</span>
             </div>
+            <div *ngIf="deviceStats.length === 0" class="empty-inline">Aucun appareil détecté.</div>
             <div class="device-separator"></div>
             <div class="browser-grid">
               <div *ngFor="let browser of browserStats" class="browser-item">
@@ -187,6 +191,7 @@
                 <span class="browser-pct">{{ browser.pct }}%</span>
               </div>
             </div>
+            <div *ngIf="browserStats.length === 0" class="empty-inline">Aucun navigateur détecté.</div>
           </div>
         </div>
       </div>
@@ -197,32 +202,29 @@
         <div class="panel">
           <div class="panel-head">
             <div class="panel-title"><div class="panel-dot"></div>Pages les plus visitées</div>
-            <div class="panel-tabs">
-              <button class="ptab active">Vues</button>
-              <button class="ptab">Durée</button>
-            </div>
           </div>
           <table class="pages-table">
             <thead>
               <tr>
                 <th>Page</th>
                 <th>Vues</th>
-                <th>Tendance</th>
-                <th>Score</th>
+                <th>Part</th>
+                <th>Volume</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let page of topPages">
                 <td class="td-path">{{ page.path }}</td>
                 <td class="td-val">{{ page.views | number }}</td>
-                <td class="td-trend" [ngClass]="page.trendUp ? 'change-up' : 'change-down'">
-                  <i [class]="page.trendUp ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-down'"></i> {{ page.trend }}
-                </td>
+                <td class="td-val">{{ page.share }}%</td>
                 <td class="td-bar">
                   <div class="page-mini-bar-wrap">
-                    <div class="page-mini-bar" [style.width]="(page.views / topPages[0].views * 100) + '%'"></div>
+                    <div class="page-mini-bar" [style.width]="getTopPageWidth(page)"></div>
                   </div>
                 </td>
+              </tr>
+              <tr *ngIf="topPages.length === 0">
+                <td colspan="4" class="empty-cell">Aucune page vue sur cette période.</td>
               </tr>
             </tbody>
           </table>
@@ -284,6 +286,7 @@
                     <div class="event-time">{{ event.time }}</div>
                   </div>
                 </div>
+                <div *ngIf="events.length === 0" class="empty-inline">Aucune activité récente.</div>
               </div>
             </div>
           </div>
@@ -315,6 +318,7 @@
             <div class="h-leg-bar"></div>
             <span class="h-leg-label">Plus actif</span>
           </div>
+          <div *ngIf="hourlyStats.length === 0" class="empty-inline heatmap-empty">Aucune donnée horaire sur cette période.</div>
         </div>
       </div>
 

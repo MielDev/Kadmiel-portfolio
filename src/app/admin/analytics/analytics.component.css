@@ -476,6 +476,31 @@
   margin-left: auto;
 }
 
+.empty-inline {
+  width: 100%;
+  padding: .75rem .85rem;
+  border: 1px dashed rgba(255, 255, 255, .1);
+  border-radius: 8px;
+  color: var(--muted2);
+  background: rgba(255, 255, 255, .025);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .68rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.empty-cell {
+  padding: 1.5rem !important;
+  text-align: center;
+  color: var(--muted2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .72rem !important;
+}
+
+.heatmap-empty {
+  margin-top: .85rem;
+}
+
 /* DEVICES SEPARATOR */
 .device-separator {
   height: 1px;
@@ -856,4 +881,13 @@
   .topbar-time, .range-tabs { display: none; }
   .content { padding: 1.2rem; }
   .kpi-row { grid-template-columns: 1fr 1fr; }
+  .toolbar { align-items: flex-start; gap: .9rem; flex-direction: column; }
+  .panel-head { align-items: flex-start; gap: .8rem; flex-direction: column; }
+  .pages-table th, .pages-table td { padding: .65rem .55rem; }
+}
+
+@media(max-width:520px) {
+  .kpi-row { grid-template-columns: 1fr; }
+  .browser-grid { grid-template-columns: repeat(2, 1fr); }
+  .geo-bar, .device-bar { width: 64px; }
 }
