@@ -112,7 +112,8 @@
       <div class="card-header-strip" [style.--strip-bg]="getStripBg(exp.type)">
         <div class="card-company">
           <div class="company-logo" [style.background]="(exp.color || getTypeColor(exp.type)) + '18'" [style.border-color]="(exp.color || getTypeColor(exp.type)) + '30'">
-            <i [class]="exp.icon || getTypeIcon(exp.type)"></i>
+            <img *ngIf="exp.image" [src]="getImageUrl(exp.image)" [alt]="exp.company" (error)="onImageError(exp, $event)">
+            <i *ngIf="!exp.image" [class]="exp.icon || getTypeIcon(exp.type)"></i>
           </div>
           {{ exp.company }}
         </div>
@@ -196,6 +197,18 @@
             <input class="form-input" type="url" [(ngModel)]="formData.digital_folder_url"
               placeholder="https://drive.google.com/…">
             <div class="form-hint">À utiliser pour la formation Services numériques aux organisations.</div>
+          </div>
+          <div class="form-group full">
+            <div class="form-label">Logo / image de l'expérience</div>
+            <div class="experience-image-upload" (click)="experienceImageInput.click()">
+              <ng-container *ngIf="!formData.image">
+                <i class="fa-solid fa-image"></i>
+                <span>Choisir une image stockée dans le backend</span>
+              </ng-container>
+              <img *ngIf="formData.image" [src]="getImageUrl(formData.image)" alt="Aperçu">
+            </div>
+            <input #experienceImageInput type="file" accept="image/*" style="display:none" (change)="onImageSelected($event)">
+            <button *ngIf="formData.image" class="btn-cancel" type="button" style="margin-top:.6rem;" (click)="removeImage()">Retirer l'image</button>
           </div>
           <div class="form-group full">
             <div class="form-label">Missions <span style="color:var(--muted);">(une par ligne)</span></div>

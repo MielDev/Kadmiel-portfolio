@@ -69,7 +69,7 @@
     <div *ngIf="!loading" class="projects-grid" [class.list-view]="currentView === 'list'" id="projectsGrid">
       <div *ngFor="let p of filteredProjects; let i = index" class="proj-card" [style.animation-delay]="i * 0.06 + 's'">
         <div class="card-thumb">
-          <img [src]="getImageUrl(p.image)" [alt]="p.title" class="card-thumb-img" (error)="$any($event.target).src='assets/placeholder-project.jpg'">
+          <img [src]="getImageUrl(p.image)" [alt]="p.title" class="card-thumb-img" (error)="onImageError($event)">
           <div class="card-thumb-overlay"></div>
           <div class="card-thumb-year">{{ p.year }}</div>
           <div class="card-thumb-status" [ngClass]="{

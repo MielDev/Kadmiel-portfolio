@@ -15,6 +15,8 @@ import { environment } from '../../../environments/environment';
   styleUrl: './projets.component.css',
 })
 export class ProjetsComponent implements OnInit {
+  readonly placeholderProjectImage = '/assets/placeholder-project.svg';
+
   /* ─── DATA ─── */
   projects: Project[] = [];
 
@@ -265,15 +267,18 @@ export class ProjetsComponent implements OnInit {
   }
 
   /* ─── UTILS ─── */
-  getImageUrl(image: string): string {
-    if (!image) return 'assets/placeholder-project.jpg';
-    if (image.startsWith('http')) return image;
-    const baseUrl = environment.apiUrl.replace('/api', '');
-    // Si l'image contient déjà "uploads/", on ne le rajoute pas
-    if (image.includes('uploads/')) {
-      return `${baseUrl}${image.startsWith('/') ? '' : '/'}${image}`;
-    }
-    return `${baseUrl}/uploads/${image}`;
+  getImageUrl(image: string | null | undefined): string {
+    if (!image) return this.placeholderProjectImage;
+    if (image.startsWith('data:') || image.startsWith('blob:') || image.startsWith('http')) return image;
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    const normalized = image.startsWith('/') ? image : image.startsWith('uploads/') ? `/${image}` : `/uploads/${image}`;
+    return `${baseUrl}${normalized}`;
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement | null;
+    if (!img || img.src.endsWith(this.placeholderProjectImage)) return;
+    img.src = this.placeholderProjectImage;
   }
 
   showToast(msg: string, type: 'info' | 'success' | 'error' = 'info') {

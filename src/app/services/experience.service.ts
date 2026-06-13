@@ -25,13 +25,13 @@ export class ExperienceService {
     );
   }
 
-  createExperience(experience: Experience): Observable<Experience> {
+  createExperience(experience: Experience | FormData): Observable<Experience> {
     return this.http.post<ApiResponse<Experience>>(this.apiUrl, experience).pipe(
       map(response => response.data)
     );
   }
 
-  updateExperience(id: string, experience: Experience): Observable<Experience> {
+  updateExperience(id: string, experience: Experience | FormData): Observable<Experience> {
     return this.http.put<ApiResponse<Experience>>(`${this.apiUrl}/${id}`, experience).pipe(
       map(response => response.data)
     );

@@ -580,6 +580,13 @@
     font-family: var(--font-title, 'Orbitron', sans-serif);
     font-size: 1.1rem; font-weight: 800; color: var(--text);
     letter-spacing: 0.05em;
+    display: inline-flex; align-items: center; gap: 0.65rem;
+  }
+  .tl-logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    object-fit: cover; background: var(--card-bg-2);
+    border: 1px solid var(--border-md);
+    flex: 0 0 auto;
   }
   .tl-date {
     font-family: 'JetBrains Mono', monospace;

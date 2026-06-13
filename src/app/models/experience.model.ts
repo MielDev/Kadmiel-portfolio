@@ -12,4 +12,5 @@ export interface Experience {
   icon?: string;
   color?: string;
   digital_folder_url?: string | null;
+  image?: string | null;
 }

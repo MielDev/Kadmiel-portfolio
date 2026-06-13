@@ -1,0 +1,8 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Image indisponible">
+  <rect width="960" height="540" fill="#111827"/>
+  <rect x="40" y="40" width="880" height="460" rx="28" fill="#151E2E" stroke="#334155" stroke-width="2"/>
+  <path d="M238 375L362 251L446 335L512 269L722 375H238Z" fill="#26364F"/>
+  <circle cx="642" cy="188" r="46" fill="#334155"/>
+  <rect x="238" y="384" width="484" height="18" rx="9" fill="#3B4B66"/>
+  <text x="480" y="444" text-anchor="middle" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="30" font-weight="700">Image indisponible</text>
+</svg>

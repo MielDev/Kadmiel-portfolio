@@ -36,6 +36,8 @@ import { environment } from '../../../environments/environment';
   styleUrl: './portfolio.component.css'
 })
 export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
+  readonly placeholderProjectImage = '/assets/placeholder-project.svg';
+
   private unlisteners: (() => void)[] = [];
   private trackedSections = new Set<string>();
   private maxScrollDepth = 0;
@@ -579,6 +581,7 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
       end_date: exp.end_date || null,
       current: Number(exp.current) || 0,
       digital_folder_url: exp.digital_folder_url || null,
+      image: exp.image || null,
     };
   }
 
@@ -590,12 +593,10 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   /* ─── UTILS ─── */
   getPhotoUrl(image: string | null | undefined): string {
     if (!image) return '';
-    if (image.startsWith('http')) return image;
-    const baseUrl = environment.apiUrl.replace('/api', '');
-    if (image.includes('uploads/')) {
-      return `${baseUrl}${image.startsWith('/') ? '' : '/'}${image}`;
-    }
-    return `${baseUrl}/uploads/${image}`;
+    if (image.startsWith('data:') || image.startsWith('blob:') || image.startsWith('http')) return image;
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    const normalized = image.startsWith('/') ? image : image.startsWith('uploads/') ? `/${image}` : `/uploads/${image}`;
+    return `${baseUrl}${normalized}`;
   }
 
   getAboutPhotoUrl(image: string | null | undefined): string {
@@ -603,8 +604,14 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getImageUrl(image: string | null | undefined): string {
-    if (!image) return 'assets/placeholder-project.jpg';
+    if (!image) return this.placeholderProjectImage;
     return this.getPhotoUrl(image);
+  }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement | null;
+    if (!img || img.src.endsWith(this.placeholderProjectImage)) return;
+    img.src = this.placeholderProjectImage;
   }
 
   isDigitalFolderFormation(exp: Experience): boolean {

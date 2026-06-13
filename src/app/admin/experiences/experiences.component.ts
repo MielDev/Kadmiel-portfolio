@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExperienceService } from '../../services/experience.service';
 import { Experience } from '../../models/experience.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-experiences',
@@ -12,6 +13,8 @@ import { Experience } from '../../models/experience.model';
   styleUrl: './experiences.component.css',
 })
 export class ExperiencesComponent implements OnInit, AfterViewInit {
+  readonly placeholderProjectImage = '/assets/placeholder-project.svg';
+
   experiences: Experience[] = [];
   filteredExperiences: Experience[] = [];
   groupedExperiences: {type: string, experiences: Experience[]}[] = [];
@@ -36,6 +39,8 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
   isDeleteModalOpen: boolean = false;
   editingExperience: Partial<Experience> | null = null;
   experienceToDelete: Experience | null = null;
+  selectedImageFile: File | null = null;
+  removeExistingImage = false;
   
   TYPE_CFG: any = {
     work: { label: 'Emploi', icon: 'fa-solid fa-briefcase', cls: 'type-work', color: '#FF3B3B', stripBg: 'rgba(255,59,59,.06)' },
@@ -54,6 +59,7 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
     end_date: '',
     description_text: '',
     digital_folder_url: '',
+    image: '',
     skills: '',
     icon: 'fa-solid fa-building',
     color: '#7C3AED',
@@ -228,6 +234,8 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
   }
 
   openModal(experience?: Experience): void {
+    this.selectedImageFile = null;
+    this.removeExistingImage = false;
     if (experience) {
       this.editingExperience = experience;
       this.formData = {
@@ -236,6 +244,7 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
         end_date: this.formatDateForInput(experience.end_date),
         description_text: (experience.description || []).join('\n'),
         digital_folder_url: experience.digital_folder_url || '',
+        image: experience.image || '',
         current_bool: experience.current === 1
       };
     } else {
@@ -244,6 +253,7 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
         company: '', title: '', type: 'work', location: '',
         start_date: '', end_date: '', description_text: '',
         digital_folder_url: '',
+        image: '',
         skills: '',
         current: 0, current_bool: false
       };
@@ -260,20 +270,61 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
     this.formData.current = this.formData.current_bool ? 1 : 0;
   }
 
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] || null;
+    if (!file) return;
+
+    this.selectedImageFile = file;
+    this.removeExistingImage = false;
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.formData.image = String(e.target?.result || '');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeImage(): void {
+    this.selectedImageFile = null;
+    this.removeExistingImage = Boolean(this.editingExperience?.image);
+    this.formData.image = '';
+  }
+
+  private buildExperiencePayload(): FormData {
+    const formData = new FormData();
+    const description = this.formData.description_text
+      .split('\n')
+      .map((item: string) => item.trim())
+      .filter(Boolean);
+
+    formData.append('company', this.formData.company || '');
+    formData.append('title', this.formData.title || '');
+    formData.append('type', this.formData.type || 'work');
+    formData.append('location', this.formData.location || '');
+    formData.append('start_date', this.formData.start_date || '');
+    formData.append('end_date', (this.formData.current_bool || !this.formData.end_date) ? '' : this.formData.end_date);
+    formData.append('description', JSON.stringify(description));
+    formData.append('current', this.formData.current_bool ? '1' : '0');
+    formData.append('icon', this.formData.icon || this.getTypeIcon(this.formData.type || 'work'));
+    formData.append('color', this.formData.color || this.getTypeColor(this.formData.type || 'work'));
+    formData.append('digital_folder_url', this.formData.digital_folder_url?.trim() || '');
+
+    if (this.selectedImageFile) {
+      formData.append('image', this.selectedImageFile);
+    } else if (this.removeExistingImage) {
+      formData.append('remove_image', '1');
+    }
+
+    return formData;
+  }
+
   saveExperience(): void {
     if (!this.formData.company || !this.formData.title || !this.formData.start_date) {
       alert('L\'entreprise, le titre et la date de début sont requis.');
       return;
     }
 
-    const experienceData: Experience = {
-      ...this.formData,
-      description: this.formData.description_text.split('\n').filter((t: string) => t.trim().length > 0),
-      current: this.formData.current_bool ? 1 : 0,
-      start_date: this.formData.start_date,
-      end_date: (this.formData.current_bool || !this.formData.end_date) ? null : this.formData.end_date,
-      digital_folder_url: this.formData.digital_folder_url?.trim() || null
-    };
+    const experienceData = this.buildExperiencePayload();
 
     if (this.editingExperience && this.editingExperience.id) {
       this.experienceService.updateExperience(this.editingExperience.id.toString(), experienceData).subscribe({
@@ -352,5 +403,19 @@ export class ExperiencesComponent implements OnInit, AfterViewInit {
 
   getStripBg(type: string): string {
     return this.TYPE_CFG[type]?.stripBg || 'rgba(124,58,237,.08)';
+  }
+
+  getImageUrl(image: string | null | undefined): string {
+    if (!image) return '';
+    if (image.startsWith('data:') || image.startsWith('blob:') || image.startsWith('http')) return image;
+    const baseUrl = environment.apiUrl.replace(/\/api$/, '');
+    const normalized = image.startsWith('/') ? image : image.startsWith('uploads/') ? `/${image}` : `/uploads/${image}`;
+    return `${baseUrl}${normalized}`;
+  }
+
+  onImageError(exp: Experience, event: Event): void {
+    exp.image = null;
+    const img = event.target as HTMLImageElement | null;
+    if (img) img.removeAttribute('src');
   }
 }

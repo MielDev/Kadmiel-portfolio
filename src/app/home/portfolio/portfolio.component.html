@@ -273,7 +273,7 @@
       @for (project of filteredProjects; track project.id) {
       <div class="project-card">
         <div class="project-thumb">
-          <img [src]="getImageUrl(project.image)" [alt]="project.title" class="project-thumb-img" (error)="$any($event.target).src='assets/placeholder-project.jpg'">
+          <img [src]="getImageUrl(project.image)" [alt]="project.title" class="project-thumb-img" (error)="onImageError($event)">
           <div class="project-year">{{ project.year }}</div>
           <div class="project-status" [ngClass]="{
               's-live': project.status === 'live' || !project.status,
@@ -328,7 +328,12 @@
         <div class="tl-dot" [class.active]="exp.current === 1 || first"></div>
         <div class="tl-card">
           <div class="tl-header">
-            <div class="tl-company">{{ exp.company }}</div>
+            <div class="tl-company">
+              @if (exp.image) {
+              <img [src]="getPhotoUrl(exp.image)" [alt]="exp.company" class="tl-logo" (error)="onImageError($event)">
+              }
+              <span>{{ exp.company }}</span>
+            </div>
             <div class="tl-date">
               {{ exp.start_date | date:'MM/yyyy' }} – {{ exp.current === 1 ? 'Présent' : (exp.end_date | date:'MM/yyyy')
               }}

@@ -6,7 +6,6 @@ import localeFr from '@angular/common/locales/fr';
 
 import { routes } from './app.routes';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
 registerLocaleData(localeFr);
 
@@ -22,6 +21,5 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(withInterceptors([AuthInterceptor])),
     { provide: LOCALE_ID, useValue: 'fr-FR' },
-    provideClientHydration(withEventReplay()),
   ],
 };
