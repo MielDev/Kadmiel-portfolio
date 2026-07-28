@@ -102,9 +102,9 @@
     <p class="hero-desc">{{ settings?.hero?.description || heroData?.description }}</p>
 
     <div class="hero-buttons">
-      <a href="#projects" class="btn btn-primary" data-analytics="hero_projects">
+      <a href="#opportunities" class="btn btn-primary" data-analytics="hero_opportunities">
         <span class="btn-dot"></span>
-        {{ settings?.hero?.cta1 || 'VOIR MES PROJETS' }}
+        {{ settings?.hero?.cta1 || 'VOIR MA RECHERCHE' }}
       </a>
       <a href="#contact" class="btn btn-outline" data-analytics="hero_contact">
         <span class="btn-icon"><i class="fa-solid fa-paper-plane"></i></span>
@@ -123,17 +123,53 @@
       </div>
       <div class="stat">
         <div class="stat-num">{{ settings?.hero?.stat2Val || heroData?.experience_years }}</div>
-        <div class="stat-label">{{ settings?.hero?.stat2Lbl || 'ANS D\'EXPÉRIENCE' }}</div>
+        <div class="stat-label">{{ settings?.hero?.stat2Lbl || 'CERTIFICAT OBTENU' }}</div>
       </div>
       <div class="stat">
         <div class="stat-num">{{ settings?.hero?.stat3Val || heroData?.passion_icon }}</div>
-        <div class="stat-label">{{ settings?.hero?.stat3Lbl || 'PASSION DU CODE' }}</div>
+        <div class="stat-label">{{ settings?.hero?.stat3Lbl || 'ALTERNANCE RECHERCHÉE' }}</div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ══════════ ABOUT ══════════ -->
+<section id="opportunities" *ngIf="availability">
+  <div class="container">
+    <div class="opportunity-layout reveal">
+      <div class="opportunity-heading">
+        <div class="section-tag">// Recherche active</div>
+        <div class="opportunity-status">
+          <span class="opportunity-status-dot" aria-hidden="true"></span>
+          {{ availability.badge_text }}
+        </div>
+        <h2 class="section-title">{{ availability.headline }}</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="opportunity-content">
+        <p class="opportunity-description">{{ availability.description }}</p>
+        <ul class="opportunity-points" *ngIf="availability.tags.length">
+          <li *ngFor="let tag of availability.tags">
+            <i [class]="tag.icon || 'fa-solid fa-check'" aria-hidden="true"></i>
+            <span>{{ tag.text }}</span>
+          </li>
+        </ul>
+        <div class="opportunity-actions">
+          <a href="#contact" class="btn btn-primary" data-analytics="opportunity_contact">
+            <span class="btn-icon"><i class="fa-solid fa-paper-plane"></i></span>
+            {{ availability.primary_cta_text }}
+          </a>
+          <a [href]="availability.secondary_cta_url" class="btn btn-outline" download data-analytics="opportunity_cv">
+            <span class="btn-icon"><i class="fa-solid fa-file-lines"></i></span>
+            {{ availability.secondary_cta_text }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="about">
   <div class="container">
     <div class="reveal">

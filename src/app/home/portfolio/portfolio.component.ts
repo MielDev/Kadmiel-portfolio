@@ -21,6 +21,7 @@ import { MessageService } from '../../services/message.service';
 import { TechnicalLevelService } from '../../services/technical-level.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { SettingsService } from '../../services/settings.service';
+import { Availability, AvailabilityService } from '../../services/availability.service';
 import { Project } from '../../models/project.model';
 import { Skill } from '../../models/skill.model';
 import { Experience } from '../../models/experience.model';
@@ -50,6 +51,7 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
   technicalLevels: TechnicalLevel[] = [];
   aboutData: About | null = null;
   heroData: HeroData | null = null;
+  availability: Availability | null = null;
   currentYear = new Date().getFullYear();
 
   // Loading states
@@ -233,6 +235,7 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
     private technicalLevelService: TechnicalLevelService,
     private analyticsService: AnalyticsService,
     private settingsService: SettingsService,
+    private availabilityService: AvailabilityService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -571,6 +574,13 @@ export class PortfolioComponent implements OnInit, AfterViewInit, OnDestroy {
         this.refreshReveals();
       },
       error: err => this.handleSectionLoadError('hero', err),
+    });
+    this.availabilityService.getAvailability().subscribe({
+      next: data => {
+        this.availability = data;
+        this.refreshReveals();
+      },
+      error: err => this.handleSectionLoadError('availability', err),
     });
   }
 

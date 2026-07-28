@@ -235,6 +235,74 @@
     border-radius: 2px; margin-bottom: 3rem;
   }
 
+  /* ─── AVAILABILITY ─── */
+  #opportunities {
+    background: var(--card-bg-3);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 4.75rem 0;
+  }
+  .opportunity-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: 4rem;
+    align-items: start;
+  }
+  .opportunity-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 1.25rem;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .opportunity-status-dot {
+    width: 0.65rem;
+    height: 0.65rem;
+    flex: 0 0 0.65rem;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+  }
+  .opportunity-content {
+    border-left: 2px solid var(--red);
+    padding-left: 2rem;
+  }
+  .opportunity-description {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.75;
+    margin: 0;
+  }
+  .opportunity-points {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem 1.5rem;
+    list-style: none;
+    margin: 2rem 0 2.25rem;
+    padding: 0;
+  }
+  .opportunity-points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+  .opportunity-points i {
+    color: var(--violet);
+    margin-top: 0.18rem;
+  }
+  .opportunity-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
+
   /* ─── ABOUT ─── */
   #about { background: var(--bg); }
   .about-grid {
@@ -823,6 +891,9 @@
     .about-grid, .contact-grid { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
     .hero-stats { gap: 1.5rem; flex-wrap: wrap; }
+    .opportunity-layout { grid-template-columns: 1fr; gap: 1.25rem; }
+    .opportunity-content { border-left: 0; border-top: 2px solid var(--red); padding: 1.5rem 0 0; }
+    .opportunity-points { grid-template-columns: 1fr; }
     .theme-panel { right: 0.5rem; left: 0.5rem; width: auto; }
   }
 
