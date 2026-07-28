@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://apis.episoletudiantedumans.fr/api'
+  apiUrl: 'https://api.kadmieltognon.fr/api'
 };
