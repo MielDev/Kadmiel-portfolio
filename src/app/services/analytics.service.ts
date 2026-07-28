@@ -72,7 +72,9 @@ export class AnalyticsService {
 
   constructor(private http: HttpClient, @Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
-    this.consentSubject = new BehaviorSubject<boolean | null>(this.getInitialConsent());
+    const initialConsent = this.getInitialConsent();
+    this.consentSubject = new BehaviorSubject<boolean | null>(initialConsent);
+    if (initialConsent !== null) this.updateGoogleConsent(initialConsent);
   }
 
   private getInitialConsent(): boolean | null {
@@ -94,6 +96,7 @@ export class AnalyticsService {
   setConsent(consent: boolean): void {
     if (this.isBrowser) localStorage.setItem(this.storageKey, String(consent));
     this.consentSubject.next(consent);
+    this.updateGoogleConsent(consent);
   }
 
   track(eventType: AnalyticsEventType | string, partial: Partial<TrackPayload> = {}): Observable<boolean> {
@@ -316,6 +319,21 @@ export class AnalyticsService {
     const id = this.generateId();
     localStorage.setItem(this.sessionKey, id);
     return id;
+  }
+
+  private updateGoogleConsent(consent: boolean): void {
+    if (!this.isBrowser) return;
+
+    const gtag = (window as Window & {
+      gtag?: (...args: unknown[]) => void;
+    }).gtag;
+
+    gtag?.('consent', 'update', {
+      analytics_storage: consent ? 'granted' : 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+    });
   }
 
   private generateId(): string {

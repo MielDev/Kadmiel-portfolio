@@ -12,8 +12,6 @@ import { AnalyticsService } from '../../../services/analytics.service';
 export class CookieConsentComponent implements OnInit {
   showBanner = false;
   isExpanded = false;
-  
-  // Simulation des "cookies" récupérés (données stockées)
   cookiesList: { name: string, value: string, description: string }[] = [];
 
   constructor(private analyticsService: AnalyticsService) {}
@@ -21,43 +19,26 @@ export class CookieConsentComponent implements OnInit {
   ngOnInit(): void {
     this.analyticsService.getConsent$().subscribe(consent => {
       this.showBanner = consent === null;
-      if (this.showBanner) {
-        this.updateCookiesList();
-      }
+      if (this.showBanner) this.updateCookiesList();
     });
   }
 
   updateCookiesList(): void {
     this.cookiesList = [
-      { 
-        name: 'analytics_consent', 
-        value: localStorage.getItem('analytics_consent') || 'non défini', 
-        description: 'Stocke votre choix de consentement pour les statistiques.' 
-      },
-      { 
-        name: 'analytics_session_id', 
-        value: localStorage.getItem('analytics_session_id') || 'généré à l\'acceptation', 
-        description: 'Identifiant unique de session pour analyser votre navigation.' 
+      {
+        name: 'analytics_consent',
+        value: localStorage.getItem('analytics_consent') || 'non défini',
+        description: 'Mémorise votre choix concernant les statistiques.'
       },
       {
-        name: 'screen_info',
-        value: `${window.screen.width}x${window.screen.height}`,
-        description: 'Dimensions de l\'écran pour optimiser l\'affichage.'
+        name: 'Google Analytics',
+        value: 'Désactivé tant que vous n\'avez pas accepté',
+        description: 'Mesure l\'audience du site uniquement après votre accord.'
       },
       {
-        name: 'hardware_info',
-        value: `${navigator.hardwareConcurrency || '?'} cœurs / ${(navigator as any).deviceMemory || '?'} Go RAM`,
-        description: 'Capacités de l\'appareil pour adapter les animations.'
-      },
-      {
-        name: 'user_pref',
-        value: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Mode sombre' : 'Mode clair',
-        description: 'Préférences système pour respecter votre thème.'
-      },
-      {
-        name: 'ad_tracking',
-        value: 'Interêts & Retargeting',
-        description: 'Analyse vos centres d\'intérêt (ex: Projets, Blog) pour vous proposer du contenu adapté.'
+        name: 'Publicité',
+        value: 'Désactivée',
+        description: 'Aucun cookie publicitaire ni retargeting n\'est activé par ce site.'
       }
     ];
   }
