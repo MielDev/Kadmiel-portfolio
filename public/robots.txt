@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /testimonial
+
+Sitemap: https://kadmieltognon.fr/sitemap.xml

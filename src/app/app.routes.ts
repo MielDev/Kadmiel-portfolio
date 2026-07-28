@@ -8,11 +8,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./layout/public-layout/public-layout.component').then((m) => m.PublicLayoutComponent),
     children: [
-      { path: '', redirectTo: 'home', pathMatch: 'full' },
       {
-        path: 'home',
+        path: '',
         loadComponent: () => import('./home/portfolio/portfolio.component').then((m) => m.PortfolioComponent),
       },
+      { path: 'home', redirectTo: '', pathMatch: 'full' },
       {
         path: 'dossier-numerique-cs-sno',
         loadComponent: () =>
@@ -86,5 +86,5 @@ export const routes: Routes = [
   },
 
   // Fallback
-  { path: '**', redirectTo: 'home' },
+  { path: '**', redirectTo: '' },
 ];
