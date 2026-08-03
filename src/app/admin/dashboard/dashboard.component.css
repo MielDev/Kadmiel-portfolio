@@ -4,9 +4,9 @@
   --bg3:       #0F172A;
   --red:       #FF3B3B;
   --violet:    #7C3AED;
-  --text:      #E5E7EB;
-  --muted:     #4B5563;
-  --muted2:    #6B7280;
+  --text:      #F8FAFC;
+  --muted:     #94A3B8;
+  --muted2:    #CBD5E1;
   --border:    rgba(255,255,255,0.06);
   --bv:        rgba(124,58,237,0.25);
   --br:        rgba(255,59,59,0.25);
@@ -95,9 +95,10 @@
   box-shadow:var(--glow-r);animation:blink 2s infinite;}
 .panel-action{
   font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.1em;
-  color:var(--violet);cursor:none;transition:color .2s;
+  color:var(--muted2);cursor:pointer;transition:color .2s;
   background:none;border:none;
 }
+.panel-action.is-active{color:var(--red);}
 .panel-action:hover{color:var(--red);}
 .panel-body{padding:1.5rem;}
 

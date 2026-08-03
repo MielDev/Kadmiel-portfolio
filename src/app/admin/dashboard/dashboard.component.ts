@@ -39,6 +39,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   donutOffsets: number[] = [];
   donutDashArrays: string[] = [];
   totalVisits = 0;
+  currentRange = '30j';
 
   private subs = new Subscription();
   isBrowser: boolean;
@@ -66,11 +67,12 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadData(): void {
+    const apiRange = this.currentRange.replace('j', 'd');
     const dataSub = forkJoin({
-      overview: this.analyticsService.getOverview(),
-      daily: this.analyticsService.getDailyStats(),
-      sources: this.analyticsService.getSources(),
-      countries: this.analyticsService.getCountries(),
+      overview: this.analyticsService.getOverview(apiRange),
+      daily: this.analyticsService.getDailyStats(apiRange),
+      sources: this.analyticsService.getSources(apiRange),
+      countries: this.analyticsService.getCountries(apiRange),
       projects: this.projectService.getProjects(),
       messages: this.messageService.getMessages()
     }).subscribe({
@@ -405,5 +407,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     return Math.round((count / this.totalVisits) * 100);
   }
 
-  setRange(btn: any, range: string): void {}
+  setRange(range: string): void {
+    if (this.currentRange === range) return;
+
+    this.currentRange = range;
+    this.loadData();
+  }
 }

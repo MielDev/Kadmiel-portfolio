@@ -34,9 +34,12 @@
       <div class="panel-head">
         <div class="panel-title"><div class="panel-dot"></div> Trafic des visiteurs</div>
         <div style="display:flex;gap:.6rem;align-items:center;">
-          <button class="panel-action" (click)="setRange($event.target, '7j')" style="opacity:.5;">7j</button>
-          <button class="panel-action" (click)="setRange($event.target, '30j')" style="color:var(--red);">30j</button>
-          <button class="panel-action" (click)="setRange($event.target, '90j')" style="opacity:.5;">90j</button>
+          <button type="button" class="panel-action" [class.is-active]="currentRange === '7j'"
+            [attr.aria-pressed]="currentRange === '7j'" (click)="setRange('7j')">7j</button>
+          <button type="button" class="panel-action" [class.is-active]="currentRange === '30j'"
+            [attr.aria-pressed]="currentRange === '30j'" (click)="setRange('30j')">30j</button>
+          <button type="button" class="panel-action" [class.is-active]="currentRange === '90j'"
+            [attr.aria-pressed]="currentRange === '90j'" (click)="setRange('90j')">90j</button>
         </div>
       </div>
       <div class="panel-body">
@@ -66,7 +69,7 @@
             </circle>
             <text x="65" y="61" text-anchor="middle" fill="#E5E7EB"
               font-family="Orbitron,sans-serif" font-size="13" font-weight="700">{{ totalVisits }}</text>
-            <text x="65" y="75" text-anchor="middle" fill="#4B5563"
+            <text x="65" y="75" text-anchor="middle" fill="#94A3B8"
               font-family="JetBrains Mono,monospace" font-size="7">ACTIONS</text>
           </svg>
           <div class="donut-legend">
